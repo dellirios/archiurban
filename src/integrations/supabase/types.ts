@@ -146,6 +146,47 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_interactions: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          created_by_id: string | null
+          id: string
+          lead_id: string
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          created_by_id?: string | null
+          id?: string
+          lead_id: string
+          tenant_id: string
+          type?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          created_by_id?: string | null
+          id?: string
+          lead_id?: string
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_interactions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
