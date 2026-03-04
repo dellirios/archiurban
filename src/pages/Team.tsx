@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApp } from '@/contexts/AppContext';
 import TeamMemberModal, { DeleteTeamMemberButton } from '@/components/archi/TeamMemberModal';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Mail, Phone, Pencil } from 'lucide-react';
@@ -33,7 +32,6 @@ interface TeamMemberRow {
 }
 
 const Team = () => {
-  const { tenantTeam } = useApp();
   const { profile } = useAuth();
   const [dbMembers, setDbMembers] = useState<TeamMemberRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,28 +56,16 @@ const Team = () => {
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-  const allMembers = [
-    ...dbMembers.map(m => ({
-      id: m.id,
-      name: m.name,
-      role: m.role,
-      avatar: m.avatar_url || getInitials(m.name),
-      email: m.email,
-      phone: m.phone || '',
-      accessLevel: m.access_level,
-      isDb: true,
-    })),
-    ...tenantTeam.map(m => ({
-      id: m.id,
-      name: m.name,
-      role: m.role,
-      avatar: m.avatar,
-      email: '',
-      phone: '',
-      accessLevel: 'editor' as string,
-      isDb: false,
-    })),
-  ];
+  const allMembers = dbMembers.map(m => ({
+    id: m.id,
+    name: m.name,
+    role: m.role,
+    avatar: m.avatar_url || getInitials(m.name),
+    email: m.email,
+    phone: m.phone || '',
+    accessLevel: m.access_level,
+    isDb: true,
+  }));
 
   return (
     <div className="space-y-6">
