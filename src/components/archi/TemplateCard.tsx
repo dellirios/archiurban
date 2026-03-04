@@ -23,7 +23,9 @@ const categoryColorMap: Record<string, string> = {
 };
 
 const emptyStep = (): TemplateStep => ({ name: '', materials: [] });
-const emptyMaterial = (): StepMaterial => ({ name: '', quantity: 1, unit: 'un' });
+const emptyMaterial = (): StepMaterial => ({ name: '', quantity: 1, unit: 'un', unit_price: 0 });
+
+const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
 /** Normalize legacy string[] steps to TemplateStep[] */
 function normalizeSteps(content: any): TemplateStep[] {
@@ -53,6 +55,7 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
 
   const steps = normalizeSteps(content);
   const totalMaterials = steps.reduce((sum, s) => sum + s.materials.length, 0);
+  const totalCost = steps.reduce((sum, s) => sum + s.materials.reduce((ms, m) => ms + (m.quantity * (m.unit_price || 0)), 0), 0);
 
   const [editForm, setEditForm] = useState({
     title: template.title,
@@ -144,6 +147,11 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
                   · {totalMaterials} {totalMaterials === 1 ? 'material' : 'materiais'}
                 </span>
               )}
+              {totalCost > 0 && (
+                <span className="text-emerald-600 font-medium ml-1">
+                  · {formatCurrency(totalCost)}
+                </span>
+              )}
             </button>
             {expanded && (
               <div className="mt-1.5 space-y-1.5">
@@ -155,6 +163,7 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
                         {s.materials.map((m, mi) => (
                           <li key={mi} className="text-[10px] text-muted-foreground flex items-center gap-1">
                             <Package className="w-2.5 h-2.5" /> {m.name} — {m.quantity} {m.unit}
+                            {(m.unit_price || 0) > 0 && <span className="text-emerald-600 ml-1">{formatCurrency(m.quantity * m.unit_price)}</span>}
                           </li>
                         ))}
                       </ul>
@@ -288,6 +297,7 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
                             <Input placeholder="Material..." value={mat.name} onChange={e => updateEditMaterial(i, mi, 'name', e.target.value)} className="h-7 text-xs flex-1" />
                             <Input type="number" placeholder="Qtd" value={mat.quantity} onChange={e => updateEditMaterial(i, mi, 'quantity', Number(e.target.value))} className="h-7 text-xs w-16" />
                             <Input placeholder="un" value={mat.unit} onChange={e => updateEditMaterial(i, mi, 'unit', e.target.value)} className="h-7 text-xs w-14" />
+                            <Input type="number" placeholder="R$ unit" value={mat.unit_price || ''} onChange={e => updateEditMaterial(i, mi, 'unit_price', Number(e.target.value))} className="h-7 text-xs w-20" />
                             <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={() => removeEditMaterial(i, mi)}>
                               <X className="w-3 h-3 text-muted-foreground" />
                             </Button>

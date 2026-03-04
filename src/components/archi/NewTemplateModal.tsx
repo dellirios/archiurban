@@ -18,6 +18,7 @@ export interface StepMaterial {
   name: string;
   quantity: number;
   unit: string;
+  unit_price: number;
 }
 
 export interface TemplateStep {
@@ -30,7 +31,7 @@ interface NewTemplateModalProps {
 }
 
 const emptyStep = (): TemplateStep => ({ name: '', materials: [] });
-const emptyMaterial = (): StepMaterial => ({ name: '', quantity: 1, unit: 'un' });
+const emptyMaterial = (): StepMaterial => ({ name: '', quantity: 1, unit: 'un', unit_price: 0 });
 
 const NewTemplateModal = ({ onAdd }: NewTemplateModalProps) => {
   const [open, setOpen] = useState(false);
@@ -214,6 +215,13 @@ const NewTemplateModal = ({ onAdd }: NewTemplateModalProps) => {
                             value={mat.unit}
                             onChange={e => updateMaterial(i, mi, 'unit', e.target.value)}
                             className="h-7 text-xs w-14"
+                          />
+                          <Input
+                            type="number"
+                            placeholder="R$ unit"
+                            value={mat.unit_price || ''}
+                            onChange={e => updateMaterial(i, mi, 'unit_price', Number(e.target.value))}
+                            className="h-7 text-xs w-20"
                           />
                           <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={() => removeMaterial(i, mi)}>
                             <X className="w-3 h-3 text-muted-foreground" />
