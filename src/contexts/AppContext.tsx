@@ -18,6 +18,7 @@ interface AppState {
   setCurrentTenant: (tenantId: string) => void;
   setSidebarOpen: (open: boolean) => void;
   addProject: (project: Project) => void;
+  updateProjectStatus: (projectId: string, status: Project['status']) => void;
   toggleTheme: () => void;
 }
 
@@ -57,6 +58,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setAllProjects(prev => [...prev, project]);
   };
 
+  const updateProjectStatus = (projectId: string, status: Project['status']) => {
+    setAllProjects(prev => prev.map(p => p.id === projectId ? { ...p, status } : p));
+  };
+
   return (
     <AppContext.Provider value={{
       currentUser,
@@ -73,6 +78,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setCurrentTenant: (id: string) => setCurrentTenantId(id),
       setSidebarOpen,
       addProject,
+      updateProjectStatus,
       toggleTheme,
     }}>
       {children}
