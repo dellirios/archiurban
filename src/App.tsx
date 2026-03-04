@@ -8,6 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ArchiLayout from "@/layouts/ArchiLayout";
 import Home from "./pages/Home";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -26,6 +28,8 @@ const AppRoutes = () => {
     return (
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={
           <ProtectedRoute><ClientPortal /></ProtectedRoute>
         } />
@@ -36,6 +40,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/app" element={
         <ProtectedRoute><ArchiLayout /></ProtectedRoute>
       }>
