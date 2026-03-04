@@ -1,15 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  FolderKanban,
-  DollarSign,
-  Users,
-  UserCircle,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Building2,
-  LogOut,
+  LayoutDashboard, FolderKanban, DollarSign, Users, UserCircle, Settings,
+  ChevronLeft, ChevronRight, Building2, LogOut, MessageSquare,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +10,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { icon: LayoutDashboard, label: 'Visão Geral', path: '/app' },
   { icon: FolderKanban, label: 'Projetos', path: '/app/projects' },
+  { icon: MessageSquare, label: 'Chat', path: '/app/chat' },
   { icon: DollarSign, label: 'Financeiro', path: '#', disabled: true, badge: 'Em breve' },
   { icon: Users, label: 'Equipe', path: '/app/team' },
   { icon: UserCircle, label: 'Clientes', path: '/app/clients' },
@@ -30,13 +23,7 @@ const ArchiSidebar = () => {
   const location = useLocation();
 
   return (
-    <aside
-      className={cn(
-        'fixed left-0 top-0 z-40 h-screen bg-card border-r border-border transition-all duration-300 flex flex-col',
-        sidebarOpen ? 'w-64' : 'w-[68px]'
-      )}
-    >
-      {/* Logo */}
+    <aside className={cn('fixed left-0 top-0 z-40 h-screen bg-card border-r border-border transition-all duration-300 flex flex-col', sidebarOpen ? 'w-64' : 'w-[68px]')}>
       <div className="h-16 flex items-center px-4 border-b border-border gap-3">
         <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
           <Building2 className="w-5 h-5 text-primary-foreground" />
@@ -49,7 +36,6 @@ const ArchiSidebar = () => {
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = item.path !== '#' && location.pathname === item.path;
@@ -58,11 +44,9 @@ const ArchiSidebar = () => {
               key={item.label}
               to={item.disabled ? '#' : item.path}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group relative',
-                isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : item.disabled
-                  ? 'text-muted-foreground/50 cursor-not-allowed'
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
+                isActive ? 'bg-primary text-primary-foreground shadow-sm'
+                  : item.disabled ? 'text-muted-foreground/50 cursor-not-allowed'
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               )}
               onClick={(e) => item.disabled && e.preventDefault()}
@@ -71,11 +55,7 @@ const ArchiSidebar = () => {
               {sidebarOpen && (
                 <>
                   <span className="truncate">{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                      {item.badge}
-                    </span>
-                  )}
+                  {item.badge && <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{item.badge}</span>}
                 </>
               )}
             </Link>
@@ -83,22 +63,12 @@ const ArchiSidebar = () => {
         })}
       </nav>
 
-      {/* Bottom actions */}
       <div className="p-3 border-t border-border space-y-1">
-        <button
-          onClick={signOut}
-          className={cn(
-            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors',
-            !sidebarOpen && 'justify-center'
-          )}
-        >
+        <button onClick={signOut} className={cn('w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors', !sidebarOpen && 'justify-center')}>
           <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
           {sidebarOpen && <span>Sair</span>}
         </button>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="w-full flex items-center justify-center py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-        >
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-full flex items-center justify-center py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
           {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </button>
       </div>

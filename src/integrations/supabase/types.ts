@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          project_id: string
+          sender_id: string
+          sender_name: string
+          sender_role: string
+          tenant_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          project_id: string
+          sender_id: string
+          sender_name: string
+          sender_role?: string
+          tenant_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          sender_id?: string
+          sender_name?: string
+          sender_role?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_invites: {
         Row: {
           accepted_at: string | null
@@ -86,6 +134,71 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          budget: number | null
+          client_email: string | null
+          client_name: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          photos: Json | null
+          priority: string
+          progress: number
+          stages: Json | null
+          start_date: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          photos?: Json | null
+          priority?: string
+          progress?: number
+          stages?: Json | null
+          start_date?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          photos?: Json | null
+          priority?: string
+          progress?: number
+          stages?: Json | null
+          start_date?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           access_level: Database["public"]["Enums"]["access_level"]
@@ -128,6 +241,30 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          id: string
+          logo: string | null
+          name: string
+          primary_color: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          logo?: string | null
+          name: string
+          primary_color?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo?: string | null
+          name?: string
+          primary_color?: string | null
         }
         Relationships: []
       }
