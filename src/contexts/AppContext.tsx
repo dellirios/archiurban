@@ -1,40 +1,51 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { tenants, users, projects as initialProjects, clients, teamMembers, notifications, type Tenant, type User, type Project, type Client, type TeamMember, type Notification } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProjects, useTenant } from '@/hooks/useSupabase';
+import type { Project, Tenant } from '@/lib/types';
 
 type Theme = 'light' | 'dark';
 
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+}
+
 interface AppState {
-  currentUser: User;
   currentTenant: Tenant;
   viewMode: 'architect' | 'client';
   sidebarOpen: boolean;
-  tenantProjects: Project[];
-  tenantClients: Client[];
-  tenantTeam: TeamMember[];
+  projects: Project[];
+  projectsLoading: boolean;
   notifications: Notification[];
-  allProjects: Project[];
   theme: Theme;
   setViewMode: (mode: 'architect' | 'client') => void;
-  setCurrentTenant: (tenantId: string) => void;
   setSidebarOpen: (open: boolean) => void;
-  addProject: (project: Project) => void;
-  updateProjectStatus: (projectId: string, status: Project['status']) => void;
+  addProject: (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => Promise<{ error: any }>;
+  updateProject: (id: string, data: Partial<Project>) => Promise<{ error: any }>;
+  deleteProject: (id: string) => Promise<{ error: any }>;
+  refetchProjects: () => Promise<void>;
   toggleTheme: () => void;
 }
+
+const defaultTenant: Tenant = { id: 'tenant-1', name: 'ArchiUrban', logo: 'AU', primary_color: '#1e3a5f' };
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [viewMode, setViewMode] = useState<'architect' | 'client'>('architect');
-  const [currentTenantId, setCurrentTenantId] = useState('tenant-1');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [allProjects, setAllProjects] = useState<Project[]>(initialProjects);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem('archi-theme') as Theme) || 'light';
     }
     return 'light';
   });
+
+  const { tenant } = useTenant();
+  const { projects, loading: projectsLoading, addProject, updateProject, deleteProject, refetch: refetchProjects } = useProjects();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -45,40 +56,25 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
-  const currentTenant = tenants.find(t => t.id === currentTenantId) || tenants[0];
-  const currentUser = viewMode === 'architect'
-    ? users.find(u => u.role === 'architect' && u.tenantId === currentTenantId) || users[0]
-    : users.find(u => u.role === 'client' && u.tenantId === currentTenantId) || users[2];
+  const currentTenant = tenant || defaultTenant;
 
-  const tenantProjects = allProjects.filter(p => p.tenantId === currentTenantId);
-  const tenantClients = clients.filter(c => c.tenantId === currentTenantId);
-  const tenantTeam = teamMembers.filter(t => t.tenantId === currentTenantId);
-
-  const addProject = (project: Project) => {
-    setAllProjects(prev => [...prev, project]);
-  };
-
-  const updateProjectStatus = (projectId: string, status: Project['status']) => {
-    setAllProjects(prev => prev.map(p => p.id === projectId ? { ...p, status } : p));
-  };
+  const notifications: Notification[] = [];
 
   return (
     <AppContext.Provider value={{
-      currentUser,
       currentTenant,
       viewMode,
       sidebarOpen,
-      tenantProjects,
-      tenantClients,
-      tenantTeam,
+      projects,
+      projectsLoading,
       notifications,
-      allProjects,
       theme,
       setViewMode,
-      setCurrentTenant: (id: string) => setCurrentTenantId(id),
       setSidebarOpen,
       addProject,
-      updateProjectStatus,
+      updateProject,
+      deleteProject,
+      refetchProjects,
       toggleTheme,
     }}>
       {children}

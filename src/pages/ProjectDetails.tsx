@@ -1,17 +1,18 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, DollarSign, Users, FileText, Camera, Clock, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Calendar, DollarSign, Users, FileText, Camera, TrendingUp } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
-import { formatCurrency, statusLabels, statusColors, priorityLabels, priorityColors } from '@/data/mockData';
+import { formatCurrency, statusLabels, statusColors, priorityLabels, priorityColors } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Timeline from '@/components/archi/Timeline';
 import PhotoGallery from '@/components/archi/PhotoGallery';
+import ProjectChat from '@/components/archi/ProjectChat';
 import { cn } from '@/lib/utils';
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { allProjects } = useApp();
-  const project = allProjects.find(p => p.id === id);
+  const { projects } = useApp();
+  const project = projects.find(p => p.id === id);
 
   if (!project) {
     return (
@@ -22,12 +23,11 @@ const ProjectDetails = () => {
     );
   }
 
-  const daysRemaining = Math.max(0, Math.ceil((new Date(project.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+  const daysRemaining = project.end_date ? Math.max(0, Math.ceil((new Date(project.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0;
   const budgetSpent = project.budget * (project.progress / 100);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start gap-4">
         <button onClick={() => navigate('/app/projects')} className="mt-1 p-1.5 rounded-lg hover:bg-secondary transition-colors">
           <ArrowLeft className="w-5 h-5 text-muted-foreground" />
@@ -42,10 +42,9 @@ const ProjectDetails = () => {
         </div>
       </div>
 
-      {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: Users, label: 'Cliente', value: project.clientName },
+          { icon: Users, label: 'Cliente', value: project.client_name || '—' },
           { icon: Calendar, label: 'Prazo', value: `${daysRemaining} dias restantes` },
           { icon: DollarSign, label: 'Orçamento', value: formatCurrency(project.budget) },
           { icon: TrendingUp, label: 'Progresso', value: `${project.progress}%` },
@@ -60,13 +59,12 @@ const ProjectDetails = () => {
         ))}
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="timeline">Cronograma</TabsTrigger>
           <TabsTrigger value="photos">Fotos</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
+          <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
         </TabsList>
 
@@ -76,8 +74,8 @@ const ProjectDetails = () => {
               <h3 className="text-sm font-semibold text-foreground">Detalhes do Projeto</h3>
               <div className="space-y-3 text-sm">
                 {[
-                  ['Início', new Date(project.startDate).toLocaleDateString('pt-BR')],
-                  ['Previsão de Entrega', new Date(project.endDate).toLocaleDateString('pt-BR')],
+                  ['Início', project.start_date ? new Date(project.start_date).toLocaleDateString('pt-BR') : '—'],
+                  ['Previsão de Entrega', project.end_date ? new Date(project.end_date).toLocaleDateString('pt-BR') : '—'],
                   ['Status', statusLabels[project.status]],
                   ['Prioridade', priorityLabels[project.priority]],
                   ['Orçamento', formatCurrency(project.budget)],
@@ -91,7 +89,7 @@ const ProjectDetails = () => {
             </div>
             <div className="bg-card border border-border rounded-xl p-5">
               <h3 className="text-sm font-semibold text-foreground mb-4">Progresso das Etapas</h3>
-              <Timeline stages={project.stages} />
+              {project.stages.length > 0 ? <Timeline stages={project.stages} /> : <p className="text-sm text-muted-foreground">Nenhuma etapa cadastrada</p>}
             </div>
           </div>
         </TabsContent>
@@ -99,41 +97,19 @@ const ProjectDetails = () => {
         <TabsContent value="timeline">
           <div className="bg-card border border-border rounded-xl p-6">
             <h3 className="text-sm font-semibold text-foreground mb-6">Cronograma Completo</h3>
-            <Timeline stages={project.stages} />
+            {project.stages.length > 0 ? <Timeline stages={project.stages} /> : <p className="text-sm text-muted-foreground">Nenhuma etapa cadastrada</p>}
           </div>
         </TabsContent>
 
         <TabsContent value="photos">
           <div className="bg-card border border-border rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-semibold text-foreground">Galeria de Fotos</h3>
-              <span className="text-xs text-muted-foreground">{project.photos.length} fotos</span>
-            </div>
-            <PhotoGallery photos={project.photos} />
+            <h3 className="text-sm font-semibold text-foreground mb-6">Galeria de Fotos ({project.photos.length})</h3>
+            {project.photos.length > 0 ? <PhotoGallery photos={project.photos} /> : <p className="text-sm text-muted-foreground">Nenhuma foto adicionada</p>}
           </div>
         </TabsContent>
 
-        <TabsContent value="documents">
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-foreground mb-4">Documentos</h3>
-            <div className="space-y-3">
-              {[
-                { name: 'Projeto Arquitetônico.pdf', size: '4.2 MB', date: project.startDate },
-                { name: 'Memorial Descritivo.pdf', size: '1.8 MB', date: project.startDate },
-                { name: 'Cronograma Executivo.xlsx', size: '520 KB', date: project.startDate },
-                { name: 'ART - Anotação de Responsabilidade.pdf', size: '280 KB', date: project.startDate },
-              ].map(doc => (
-                <div key={doc.name} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/30 transition-colors cursor-pointer">
-                  <FileText className="w-5 h-5 text-primary flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">{doc.size}</p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{new Date(doc.date).toLocaleDateString('pt-BR')}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <TabsContent value="chat">
+          <ProjectChat projectId={project.id} />
         </TabsContent>
 
         <TabsContent value="financial">
@@ -150,15 +126,6 @@ const ProjectDetails = () => {
                   <p className={cn('text-lg font-bold', item.color)}>{item.value}</p>
                 </div>
               ))}
-            </div>
-            <div>
-              <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                <span>Execução do orçamento</span>
-                <span>{project.progress}%</span>
-              </div>
-              <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${project.progress}%` }} />
-              </div>
             </div>
           </div>
         </TabsContent>
