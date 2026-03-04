@@ -9,7 +9,7 @@ import { LayoutTemplate, Building2, Globe, Loader2 } from 'lucide-react';
 const categories: (TemplateCategory | 'all')[] = ['all', 'schedule', 'budget', 'checklist', 'contract'];
 
 const TemplatesPage = () => {
-  const { templates, loading, addTemplate } = useTemplates();
+  const { templates, loading, addTemplate, updateTemplate, duplicateTemplate } = useTemplates();
   const [category, setCategory] = useState<TemplateCategory | 'all'>('all');
 
   const filterByCategory = (items: typeof templates) =>
@@ -39,7 +39,6 @@ const TemplatesPage = () => {
         <NewTemplateModal onAdd={addTemplate} />
       </div>
 
-      {/* Category filter */}
       <div className="flex flex-wrap gap-2">
         {categories.map(cat => (
           <button
@@ -59,10 +58,10 @@ const TemplatesPage = () => {
       <Tabs defaultValue="office" className="space-y-4">
         <TabsList className="bg-secondary/50">
           <TabsTrigger value="office" className="text-xs gap-1.5">
-            <Building2 className="w-3.5 h-3.5" /> Templates do Escritório
+            <Building2 className="w-3.5 h-3.5" /> Templates do Escritório ({officeTemplates.length})
           </TabsTrigger>
           <TabsTrigger value="community" className="text-xs gap-1.5">
-            <Globe className="w-3.5 h-3.5" /> Comunidade ArchiUrban
+            <Globe className="w-3.5 h-3.5" /> Comunidade ArchiUrban ({communityTemplates.length})
           </TabsTrigger>
         </TabsList>
 
@@ -70,18 +69,23 @@ const TemplatesPage = () => {
           {officeTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {officeTemplates.map(t => (
-                <TemplateCard key={t.id} template={{
-                  id: t.id, title: t.title, description: t.description || '',
-                  category: t.category as TemplateCategory, icon: t.icon,
-                  usageCount: t.usage_count, community: t.community,
-                  createdAt: t.created_at,
-                }} />
+                <TemplateCard
+                  key={t.id}
+                  template={{
+                    id: t.id, title: t.title, description: t.description || '',
+                    category: t.category as TemplateCategory, icon: t.icon,
+                    usageCount: t.usage_count, community: t.community,
+                    createdAt: t.created_at,
+                  }}
+                  onUpdate={(data) => updateTemplate(t.id, data)}
+                />
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <LayoutTemplate className="w-10 h-10 mb-2" />
               <p className="text-sm">Nenhum template nesta categoria</p>
+              <p className="text-xs mt-1">Use a aba "Comunidade" para duplicar templates prontos</p>
             </div>
           )}
         </TabsContent>
@@ -90,12 +94,17 @@ const TemplatesPage = () => {
           {communityTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {communityTemplates.map(t => (
-                <TemplateCard key={t.id} template={{
-                  id: t.id, title: t.title, description: t.description || '',
-                  category: t.category as TemplateCategory, icon: t.icon,
-                  usageCount: t.usage_count, community: t.community,
-                  createdAt: t.created_at,
-                }} />
+                <TemplateCard
+                  key={t.id}
+                  template={{
+                    id: t.id, title: t.title, description: t.description || '',
+                    category: t.category as TemplateCategory, icon: t.icon,
+                    usageCount: t.usage_count, community: t.community,
+                    createdAt: t.created_at,
+                  }}
+                  onDuplicate={() => duplicateTemplate(t)}
+                  onUpdate={(data) => updateTemplate(t.id, data)}
+                />
               ))}
             </div>
           ) : (

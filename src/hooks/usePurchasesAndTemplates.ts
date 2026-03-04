@@ -181,13 +181,38 @@ export function useTemplates() {
     return { error };
   };
 
+  const updateTemplate = async (id: string, data: Partial<TemplateRow>) => {
+    const { error } = await supabase.from('templates')
+      .update({ ...data, updated_at: new Date().toISOString() } as any)
+      .eq('id', id);
+    if (!error) await fetchTemplates();
+    return { error };
+  };
+
   const deleteTemplate = async (id: string) => {
     const { error } = await supabase.from('templates').delete().eq('id', id);
     if (!error) await fetchTemplates();
     return { error };
   };
 
-  return { templates, loading, addTemplate, deleteTemplate, refetch: fetchTemplates };
+  const duplicateTemplate = async (source: TemplateRow) => {
+    if (!tenantId) return { error: new Error('No tenant') };
+    const { error } = await supabase.from('templates').insert({
+      tenant_id: tenantId,
+      title: source.title,
+      description: source.description,
+      category: source.category,
+      icon: source.icon,
+      content: source.content,
+      community: false,
+      created_by: profile?.full_name || user?.email || '',
+      created_by_id: user?.id,
+    } as any);
+    if (!error) await fetchTemplates();
+    return { error };
+  };
+
+  return { templates, loading, addTemplate, updateTemplate, deleteTemplate, duplicateTemplate, refetch: fetchTemplates };
 }
 
 // ── useNotifications ──
