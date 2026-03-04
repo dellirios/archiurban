@@ -7,6 +7,7 @@ import { AppProvider, useApp } from "@/contexts/AppContext";
 import ArchiLayout from "@/layouts/ArchiLayout";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
+import ProjectDetails from "./pages/ProjectDetails";
 import Team from "./pages/Team";
 import Clients from "./pages/Clients";
 import AppSettings from "./pages/AppSettings";
@@ -32,6 +33,7 @@ const AppRoutes = () => {
       <Route path="/app" element={<ArchiLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="projects" element={<Projects />} />
+        <Route path="projects/:id" element={<ProjectDetails />} />
         <Route path="team" element={<Team />} />
         <Route path="clients" element={<Clients />} />
         <Route path="settings" element={<AppSettings />} />

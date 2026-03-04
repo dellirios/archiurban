@@ -1,8 +1,11 @@
 import { FolderKanban, AlertTriangle, TrendingUp, Clock, ArrowUpRight } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import MetricCard from '@/components/archi/MetricCard';
 import { useApp } from '@/contexts/AppContext';
 import { statusLabels, statusColors, formatCurrency } from '@/data/mockData';
 import { cn } from '@/lib/utils';
+
+const STATUS_CHART_COLORS = ['#38bdf8', '#8b5cf6', '#f59e0b', '#10b981'];
 
 const Dashboard = () => {
   const { tenantProjects, currentTenant, tenantClients, tenantTeam } = useApp();
@@ -14,6 +17,24 @@ const Dashboard = () => {
   }).length;
   const totalBudget = tenantProjects.filter(p => p.status !== 'completed').reduce((sum, p) => sum + p.budget, 0);
 
+  // Monthly progress data
+  const monthlyData = [
+    { month: 'Jan', projetos: 2, concluidos: 1 },
+    { month: 'Fev', projetos: 3, concluidos: 1 },
+    { month: 'Mar', projetos: 4, concluidos: 2 },
+    { month: 'Abr', projetos: 3, concluidos: 1 },
+    { month: 'Mai', projetos: 5, concluidos: 2 },
+    { month: 'Jun', projetos: 4, concluidos: 3 },
+  ];
+
+  // Status distribution
+  const statusData = [
+    { name: 'Planejamento', value: tenantProjects.filter(p => p.status === 'planning').length },
+    { name: 'Execução', value: tenantProjects.filter(p => p.status === 'execution').length },
+    { name: 'Revisão', value: tenantProjects.filter(p => p.status === 'review').length },
+    { name: 'Finalizado', value: tenantProjects.filter(p => p.status === 'completed').length },
+  ].filter(d => d.value > 0);
+
   const recentUpdates = [
     { id: '1', text: 'Fotos adicionadas ao projeto Residência Vila Nova', time: '2 horas atrás', icon: '📸' },
     { id: '2', text: 'Etapa "Alvenaria" concluída no Edifício Aurora', time: '5 horas atrás', icon: '✅' },
@@ -23,7 +44,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Visão Geral</h1>
         <p className="text-sm text-muted-foreground mt-1">{currentTenant.name} — Painel de controle</p>
@@ -31,30 +51,49 @@ const Dashboard = () => {
 
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <MetricCard
-          title="Projetos Ativos"
-          value={activeProjects}
-          icon={FolderKanban}
-          trend={{ value: '+2 este mês', positive: true }}
-        />
-        <MetricCard
-          title="Tarefas Atrasadas"
-          value={overdueProjects}
-          icon={AlertTriangle}
-          trend={overdueProjects > 0 ? { value: 'Atenção', positive: false } : undefined}
-        />
-        <MetricCard
-          title="Receita Prevista"
-          value={formatCurrency(totalBudget)}
-          icon={TrendingUp}
-          subtitle="Em projetos ativos"
-        />
-        <MetricCard
-          title="Clientes Ativos"
-          value={tenantClients.length}
-          icon={Clock}
-          subtitle={`${tenantTeam.length} membros na equipe`}
-        />
+        <MetricCard title="Projetos Ativos" value={activeProjects} icon={FolderKanban} trend={{ value: '+2 este mês', positive: true }} />
+        <MetricCard title="Tarefas Atrasadas" value={overdueProjects} icon={AlertTriangle} trend={overdueProjects > 0 ? { value: 'Atenção', positive: false } : undefined} />
+        <MetricCard title="Receita Prevista" value={formatCurrency(totalBudget)} icon={TrendingUp} subtitle="Em projetos ativos" />
+        <MetricCard title="Clientes Ativos" value={tenantClients.length} icon={Clock} subtitle={`${tenantTeam.length} membros na equipe`} />
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 bg-card border border-border rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Progresso Mensal</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData} barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Bar dataKey="projetos" name="Novos Projetos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="concluidos" name="Concluídos" fill="#10b981" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Distribuição por Status</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={statusData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
+                  {statusData.map((_, index) => (
+                    <Cell key={index} fill={STATUS_CHART_COLORS[index % STATUS_CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
