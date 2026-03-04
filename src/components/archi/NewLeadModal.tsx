@@ -4,10 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
-import { type Lead, type LeadTemperature } from '@/data/crmMockData';
 
 interface NewLeadModalProps {
-  onAdd: (lead: Lead) => void;
+  onAdd: (lead: { name: string; email: string; phone: string; origin: string; estimatedValue: number }) => void;
 }
 
 const NewLeadModal = ({ onAdd }: NewLeadModalProps) => {
@@ -17,15 +16,11 @@ const NewLeadModal = ({ onAdd }: NewLeadModalProps) => {
   const handleSubmit = () => {
     if (!form.name) return;
     onAdd({
-      id: crypto.randomUUID(),
       name: form.name,
       email: form.email,
       phone: form.phone,
       origin: form.origin || 'Direto',
       estimatedValue: Number(form.estimatedValue) || 0,
-      temperature: 'warm' as LeadTemperature,
-      lastContact: new Date().toISOString().slice(0, 10),
-      stage: 'new',
     });
     setForm({ name: '', email: '', phone: '', origin: '', estimatedValue: '' });
     setOpen(false);
