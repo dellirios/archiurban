@@ -98,6 +98,54 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          estimated_value: number | null
+          id: string
+          last_contact: string | null
+          name: string
+          notes: string | null
+          origin: string | null
+          phone: string | null
+          stage: string
+          temperature: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          last_contact?: string | null
+          name: string
+          notes?: string | null
+          origin?: string | null
+          phone?: string | null
+          stage?: string
+          temperature?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          last_contact?: string | null
+          name?: string
+          notes?: string | null
+          origin?: string | null
+          phone?: string | null
+          stage?: string
+          temperature?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -133,6 +181,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      project_files: {
+        Row: {
+          created_at: string
+          file_size: number | null
+          file_type: string
+          folder: string
+          id: string
+          name: string
+          project_id: string
+          storage_path: string
+          tenant_id: string
+          uploaded_by: string
+          uploaded_by_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_size?: number | null
+          file_type?: string
+          folder?: string
+          id?: string
+          name: string
+          project_id: string
+          storage_path: string
+          tenant_id: string
+          uploaded_by?: string
+          uploaded_by_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_size?: number | null
+          file_type?: string
+          folder?: string
+          id?: string
+          name?: string
+          project_id?: string
+          storage_path?: string
+          tenant_id?: string
+          uploaded_by?: string
+          uploaded_by_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {

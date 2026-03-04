@@ -116,7 +116,7 @@ const ProjectDetails = () => {
 
         <TabsContent value="files">
           <div className="bg-card border border-border rounded-xl p-6">
-            <FileExplorer />
+            <FileExplorer projectId={project.id} />
           </div>
         </TabsContent>
 

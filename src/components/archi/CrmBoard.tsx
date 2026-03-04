@@ -1,16 +1,32 @@
 import { useState } from 'react';
-import { type Lead, crmStages, mockLeads } from '@/data/crmMockData';
+import { useCrmLeads } from '@/hooks/useCrmAndFiles';
+import { useAuth } from '@/contexts/AuthContext';
+import { crmStages, temperatureLabels, temperatureColors, type LeadTemperature } from '@/data/crmMockData';
 import { formatCurrency } from '@/lib/types';
 import LeadCard from './LeadCard';
 import NewLeadModal from './NewLeadModal';
+import { Loader2 } from 'lucide-react';
 
 const CrmBoard = () => {
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
+  const { profile } = useAuth();
+  const tenantId = profile?.tenant_id || 'tenant-1';
+  const { leads, loading, addLead, updateLead } = useCrmLeads();
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
 
-  const handleAddLead = (lead: Lead) => {
-    setLeads(prev => [lead, ...prev]);
+  const handleAddLead = async (lead: { name: string; email: string; phone: string; origin: string; estimatedValue: number }) => {
+    await addLead({
+      tenant_id: tenantId,
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      origin: lead.origin,
+      estimated_value: lead.estimatedValue,
+      temperature: 'warm',
+      last_contact: new Date().toISOString().slice(0, 10),
+      stage: 'new',
+      notes: '',
+    });
   };
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
@@ -18,22 +34,36 @@ const CrmBoard = () => {
     setDraggedId(id);
   };
 
-  const handleDragOver = (e: React.DragEvent, colKey: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverCol(colKey);
-  };
-
-  const handleDrop = (e: React.DragEvent, newStage: string) => {
+  const handleDrop = async (e: React.DragEvent, newStage: string) => {
     e.preventDefault();
     if (draggedId) {
-      setLeads(prev => prev.map(l => l.id === draggedId ? { ...l, stage: newStage } : l));
+      await updateLead(draggedId, { stage: newStage });
     }
     setDraggedId(null);
     setDragOverCol(null);
   };
 
-  const totalPipeline = leads.filter(l => l.stage !== 'closed').reduce((s, l) => s + l.estimatedValue, 0);
+  const mappedLeads = leads.map(l => ({
+    id: l.id,
+    name: l.name,
+    email: l.email,
+    phone: l.phone,
+    origin: l.origin,
+    estimatedValue: l.estimated_value,
+    temperature: l.temperature as LeadTemperature,
+    lastContact: l.last_contact,
+    stage: l.stage,
+  }));
+
+  const totalPipeline = mappedLeads.filter(l => l.stage !== 'closed').reduce((s, l) => s + l.estimatedValue, 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -41,7 +71,7 @@ const CrmBoard = () => {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Funil Comercial</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {leads.length} leads · Pipeline: {formatCurrency(totalPipeline)}
+            {mappedLeads.length} leads · Pipeline: {formatCurrency(totalPipeline)}
           </p>
         </div>
         <NewLeadModal onAdd={handleAddLead} />
@@ -49,7 +79,7 @@ const CrmBoard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         {crmStages.map(col => {
-          const colLeads = leads.filter(l => l.stage === col.key);
+          const colLeads = mappedLeads.filter(l => l.stage === col.key);
           const colTotal = colLeads.reduce((s, l) => s + l.estimatedValue, 0);
           const isOver = dragOverCol === col.key;
 
@@ -57,7 +87,7 @@ const CrmBoard = () => {
             <div
               key={col.key}
               className="flex flex-col"
-              onDragOver={e => handleDragOver(e, col.key)}
+              onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverCol(col.key); }}
               onDragLeave={() => setDragOverCol(null)}
               onDrop={e => handleDrop(e, col.key)}
             >

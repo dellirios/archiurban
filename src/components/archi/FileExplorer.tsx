@@ -1,21 +1,18 @@
-import { useState } from 'react';
-import { defaultFolders, mockFiles, type ProjectFile } from '@/data/filesMockData';
+import { useState, useRef } from 'react';
+import { useProjectFiles, type ProjectFileRow } from '@/hooks/useCrmAndFiles';
+import { defaultFolders } from '@/data/filesMockData';
 import { cn } from '@/lib/utils';
 import {
   FolderOpen, Folder, ArrowLeft, LayoutGrid, List, Upload, FileText, Image, File,
-  MoreVertical, Download, Eye, Trash2, Table2, HardHat, Ruler,
+  MoreVertical, Download, Eye, Trash2, Table2, HardHat, Ruler, Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from '@/components/ui/sonner';
 
 const typeIcons: Record<string, React.ElementType> = {
-  pdf: FileText,
-  image: Image,
-  dwg: Ruler,
-  doc: FileText,
-  spreadsheet: Table2,
-  other: File,
+  pdf: FileText, image: Image, dwg: Ruler, doc: FileText, spreadsheet: Table2, other: File,
 };
 
 const typeColors: Record<string, string> = {
@@ -28,38 +25,72 @@ const typeColors: Record<string, string> = {
 };
 
 const folderIcons: Record<string, React.ElementType> = {
-  ruler: Ruler,
-  image: Image,
-  'file-text': FileText,
-  'hard-hat': HardHat,
+  ruler: Ruler, image: Image, 'file-text': FileText, 'hard-hat': HardHat,
 };
 
-const FileExplorer = () => {
+const formatSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+interface FileExplorerProps {
+  projectId: string;
+}
+
+const FileExplorer = ({ projectId }: FileExplorerProps) => {
+  const { files, loading, uploading, uploadFile, deleteFile, getSignedUrl } = useProjectFiles(projectId);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isDragOver, setIsDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
-  const files = currentFolder
-    ? mockFiles.filter(f => f.folder === currentFolder)
-    : [];
-
+  const folderFiles = currentFolder ? files.filter(f => f.folder === currentFolder) : [];
   const currentFolderData = defaultFolders.find(f => f.key === currentFolder);
 
-  const handleDragEvents = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleUpload = async (fileList: FileList | null, folder: string) => {
+    if (!fileList) return;
+    for (const file of Array.from(fileList)) {
+      const { error } = await uploadFile(file, folder);
+      if (error) toast.error(`Erro ao enviar ${file.name}`);
+      else toast.success(`${file.name} enviado com sucesso`);
+    }
   };
 
-  const renderFileIcon = (file: ProjectFile) => {
-    const Icon = typeIcons[file.type] || File;
+  const handleDelete = async (file: ProjectFileRow) => {
+    const { error } = await deleteFile(file);
+    if (error) toast.error('Erro ao excluir arquivo');
+    else toast.success('Arquivo excluído');
+  };
+
+  const handleView = async (file: ProjectFileRow) => {
+    const url = await getSignedUrl(file.storage_path);
+    if (url) window.open(url, '_blank');
+  };
+
+  const handleDownload = async (file: ProjectFileRow) => {
+    const url = await getSignedUrl(file.storage_path);
+    if (url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      a.click();
+    }
+  };
+
+  const handleDragEvents = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); };
+
+  const renderFileIcon = (file: ProjectFileRow) => {
+    const Icon = typeIcons[file.file_type] || File;
     return (
-      <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', typeColors[file.type] || typeColors.other)}>
+      <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', typeColors[file.file_type] || typeColors.other)}>
         <Icon className="w-5 h-5" />
       </div>
     );
   };
 
-  const renderActions = (file: ProjectFile) => (
+  const renderActions = (file: ProjectFileRow) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
@@ -67,36 +98,37 @@ const FileExplorer = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem><Eye className="w-3.5 h-3.5 mr-2" /> Visualizar</DropdownMenuItem>
-        <DropdownMenuItem><Download className="w-3.5 h-3.5 mr-2" /> Baixar</DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive focus:text-destructive"><Trash2 className="w-3.5 h-3.5 mr-2" /> Excluir</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleView(file)}><Eye className="w-3.5 h-3.5 mr-2" /> Visualizar</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleDownload(file)}><Download className="w-3.5 h-3.5 mr-2" /> Baixar</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleDelete(file)} className="text-destructive focus:text-destructive"><Trash2 className="w-3.5 h-3.5 mr-2" /> Excluir</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-40"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
+  }
 
   // ── Folder view ──
   if (!currentFolder) {
     return (
       <div className="space-y-5">
+        <input ref={inputRef} type="file" multiple className="hidden" onChange={e => handleUpload(e.target.files, 'plans')} />
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Pastas</h3>
-          <button
-            className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
-          >
-            <Upload className="w-3.5 h-3.5" /> Upload
+          <button onClick={() => inputRef.current?.click()} disabled={uploading}
+            className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} Upload
           </button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {defaultFolders.map(folder => {
             const FIcon = folderIcons[folder.icon] || FolderOpen;
-            const count = mockFiles.filter(f => f.folder === folder.key).length;
+            const count = files.filter(f => f.folder === folder.key).length;
             return (
-              <button
-                key={folder.key}
-                onClick={() => setCurrentFolder(folder.key)}
-                className="bg-card border border-border rounded-xl p-4 hover:shadow-md hover:border-primary/30 transition-all text-left group"
-              >
+              <button key={folder.key} onClick={() => setCurrentFolder(folder.key)}
+                className="bg-card border border-border rounded-xl p-4 hover:shadow-md hover:border-primary/30 transition-all text-left group">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <FIcon className="w-5 h-5" />
                 </div>
@@ -107,15 +139,12 @@ const FileExplorer = () => {
           })}
         </div>
 
-        {/* Dropzone */}
         <div
-          className={cn(
-            'border-2 border-dashed rounded-xl p-8 text-center transition-colors',
-            isDragOver ? 'border-primary bg-primary/5' : 'border-border'
-          )}
+          className={cn('border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer', isDragOver ? 'border-primary bg-primary/5' : 'border-border')}
+          onClick={() => inputRef.current?.click()}
           onDragOver={e => { handleDragEvents(e); setIsDragOver(true); }}
           onDragLeave={e => { handleDragEvents(e); setIsDragOver(false); }}
-          onDrop={e => { handleDragEvents(e); setIsDragOver(false); }}
+          onDrop={e => { handleDragEvents(e); setIsDragOver(false); handleUpload(e.dataTransfer.files, 'plans'); }}
         >
           <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">Arraste arquivos aqui ou clique para enviar</p>
@@ -125,9 +154,11 @@ const FileExplorer = () => {
     );
   }
 
-  // ── File list / grid inside folder ──
+  // ── Files in folder ──
+
   return (
     <div className="space-y-4">
+      <input ref={folderInputRef} type="file" multiple className="hidden" onChange={e => handleUpload(e.target.files, currentFolder)} />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button onClick={() => setCurrentFolder(null)} className="p-1.5 rounded-md hover:bg-secondary transition-colors">
@@ -135,7 +166,7 @@ const FileExplorer = () => {
           </button>
           <Folder className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-foreground">{currentFolderData?.label}</h3>
-          <span className="text-xs text-muted-foreground">({files.length})</span>
+          <span className="text-xs text-muted-foreground">({folderFiles.length})</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-secondary rounded-lg p-0.5">
@@ -146,13 +177,18 @@ const FileExplorer = () => {
               <LayoutGrid className="w-3.5 h-3.5" />
             </button>
           </div>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
-            <Upload className="w-3.5 h-3.5" /> Upload
+          <button onClick={() => folderInputRef.current?.click()} disabled={uploading}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} Upload
           </button>
         </div>
       </div>
 
-      {viewMode === 'list' ? (
+      {folderFiles.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-border rounded-xl">
+          <p className="text-sm text-muted-foreground">Nenhum arquivo nesta pasta</p>
+        </div>
+      ) : viewMode === 'list' ? (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
@@ -165,7 +201,7 @@ const FileExplorer = () => {
               </tr>
             </thead>
             <tbody>
-              {files.map(file => (
+              {folderFiles.map(file => (
                 <tr key={file.id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -173,9 +209,9 @@ const FileExplorer = () => {
                       <span className="text-sm font-medium text-foreground truncate">{file.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{file.size}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">{file.uploadedBy}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">{new Date(file.uploadedAt).toLocaleDateString('pt-BR')}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{formatSize(file.file_size)}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">{file.uploaded_by}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">{new Date(file.created_at).toLocaleDateString('pt-BR')}</td>
                   <td className="px-2 py-3">{renderActions(file)}</td>
                 </tr>
               ))}
@@ -184,16 +220,16 @@ const FileExplorer = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {files.map(file => (
+          {folderFiles.map(file => (
             <div key={file.id} className="bg-card border border-border rounded-xl p-3 hover:shadow-md transition-shadow group relative">
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 {renderActions(file)}
               </div>
-              <div className={cn('w-full h-24 rounded-lg flex items-center justify-center mb-3', typeColors[file.type] || typeColors.other)}>
-                {(() => { const Icon = typeIcons[file.type] || File; return <Icon className="w-10 h-10" />; })()}
+              <div className={cn('w-full h-24 rounded-lg flex items-center justify-center mb-3', typeColors[file.file_type] || typeColors.other)}>
+                {(() => { const Icon = typeIcons[file.file_type] || File; return <Icon className="w-10 h-10" />; })()}
               </div>
               <p className="text-xs font-medium text-foreground truncate">{file.name}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{file.size} · {file.uploadedBy}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{formatSize(file.file_size)} · {file.uploaded_by}</p>
             </div>
           ))}
         </div>
