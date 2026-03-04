@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, FolderKanban, DollarSign, Users, UserCircle, Settings,
-  ChevronLeft, ChevronRight, Building2, LogOut, MessageSquare,
+  ChevronLeft, ChevronRight, Building2, LogOut, MessageSquare, TrendingUp,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { icon: LayoutDashboard, label: 'Visão Geral', path: '/app' },
   { icon: FolderKanban, label: 'Projetos', path: '/app/projects' },
+  { icon: TrendingUp, label: 'CRM', path: '/app/crm' },
   { icon: MessageSquare, label: 'Chat', path: '/app/chat' },
   { icon: DollarSign, label: 'Financeiro', path: '#', disabled: true, badge: 'Em breve' },
   { icon: Users, label: 'Equipe', path: '/app/team' },

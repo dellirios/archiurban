@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, DollarSign, Users, FileText, Camera, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Calendar, DollarSign, Users, FileText, Camera, TrendingUp, FolderOpen } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { formatCurrency, statusLabels, statusColors, priorityLabels, priorityColors } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Timeline from '@/components/archi/Timeline';
 import PhotoGallery from '@/components/archi/PhotoGallery';
 import ProjectChat from '@/components/archi/ProjectChat';
+import FileExplorer from '@/components/archi/FileExplorer';
 import { cn } from '@/lib/utils';
 
 const ProjectDetails = () => {
@@ -65,6 +66,7 @@ const ProjectDetails = () => {
           <TabsTrigger value="timeline">Cronograma</TabsTrigger>
           <TabsTrigger value="photos">Fotos</TabsTrigger>
           <TabsTrigger value="chat">Chat</TabsTrigger>
+          <TabsTrigger value="files">Arquivos</TabsTrigger>
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
         </TabsList>
 
@@ -110,6 +112,12 @@ const ProjectDetails = () => {
 
         <TabsContent value="chat">
           <ProjectChat projectId={project.id} />
+        </TabsContent>
+
+        <TabsContent value="files">
+          <div className="bg-card border border-border rounded-xl p-6">
+            <FileExplorer />
+          </div>
         </TabsContent>
 
         <TabsContent value="financial">

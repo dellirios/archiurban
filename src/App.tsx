@@ -19,6 +19,7 @@ import AppSettings from "./pages/AppSettings";
 import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 import Chat from "./pages/Chat";
+import CrmPage from "./pages/CrmPage";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const AppRoutes = () => {
         <Route path="team" element={<Team />} />
         <Route path="clients" element={<Clients />} />
         <Route path="chat" element={<Chat />} />
+        <Route path="crm" element={<CrmPage />} />
         <Route path="settings" element={<AppSettings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
