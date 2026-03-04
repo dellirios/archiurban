@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Search, Bell, ChevronDown, ArrowLeftRight, LogOut, Sun, Moon } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { tenants } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 const ArchiTopbar = () => {
   const { currentUser, currentTenant, viewMode, setViewMode, setCurrentTenant, notifications, theme, toggleTheme } = useApp();
+  const { signOut } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showTenantSelector, setShowTenantSelector] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -131,7 +133,10 @@ const ArchiTopbar = () => {
                 <p className="text-sm font-medium text-foreground">{currentUser.name}</p>
                 <p className="text-xs text-muted-foreground">{currentUser.email}</p>
               </div>
-              <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-accent transition-colors">
+              <button
+                onClick={signOut}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-accent transition-colors"
+              >
                 <LogOut className="w-4 h-4" />
                 Sair
               </button>

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -10,8 +9,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Building2,
+  LogOut,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -25,6 +26,7 @@ const navItems = [
 
 const ArchiSidebar = () => {
   const { sidebarOpen, setSidebarOpen, currentTenant } = useApp();
+  const { signOut } = useAuth();
   const location = useLocation();
 
   return (
@@ -81,8 +83,18 @@ const ArchiSidebar = () => {
         })}
       </nav>
 
-      {/* Collapse Toggle */}
-      <div className="p-3 border-t border-border">
+      {/* Bottom actions */}
+      <div className="p-3 border-t border-border space-y-1">
+        <button
+          onClick={signOut}
+          className={cn(
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors',
+            !sidebarOpen && 'justify-center'
+          )}
+        >
+          <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
+          {sidebarOpen && <span>Sair</span>}
+        </button>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="w-full flex items-center justify-center py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
