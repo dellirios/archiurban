@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CalendarDays, Calculator, ClipboardCheck, FileText, Users, Play, Pencil, Copy, Check, Loader2, Plus, X, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
+import { CalendarDays, Calculator, ClipboardCheck, FileText, Users, Play, Pencil, Copy, Check, Loader2, Plus, X, GripVertical, ChevronDown, ChevronUp, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { categoryLabels, type TemplateCategory } from '@/data/templatesMockData';
 import type { Template } from '@/data/templatesMockData';
 import { toast } from 'sonner';
+import type { TemplateStep, StepMaterial } from './NewTemplateModal';
 
 const iconMap: Record<string, React.ElementType> = {
   CalendarDays, Calculator, ClipboardCheck, FileText,
@@ -20,6 +21,19 @@ const categoryColorMap: Record<string, string> = {
   checklist: 'bg-amber-100 text-amber-700',
   contract: 'bg-violet-100 text-violet-700',
 };
+
+const emptyStep = (): TemplateStep => ({ name: '', materials: [] });
+const emptyMaterial = (): StepMaterial => ({ name: '', quantity: 1, unit: 'un' });
+
+/** Normalize legacy string[] steps to TemplateStep[] */
+function normalizeSteps(content: any): TemplateStep[] {
+  if (!content?.steps || !Array.isArray(content.steps)) return [];
+  return content.steps.map((s: any) =>
+    typeof s === 'string'
+      ? { name: s, materials: [] }
+      : { name: s.name || '', materials: Array.isArray(s.materials) ? s.materials : [] }
+  );
+}
 
 interface TemplateCardProps {
   template: Template;
@@ -37,7 +51,8 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  const steps: string[] = content?.steps || [];
+  const steps = normalizeSteps(content);
+  const totalMaterials = steps.reduce((sum, s) => sum + s.materials.length, 0);
 
   const [editForm, setEditForm] = useState({
     title: template.title,
@@ -45,7 +60,8 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
     category: template.category as string,
     icon: template.icon,
   });
-  const [editSteps, setEditSteps] = useState<string[]>(steps.length > 0 ? steps : ['']);
+  const [editSteps, setEditSteps] = useState<TemplateStep[]>(steps.length > 0 ? steps : [emptyStep()]);
+  const [expandedEditStep, setExpandedEditStep] = useState<number | null>(null);
 
   const handleDuplicate = async () => {
     if (!onDuplicate) return;
@@ -62,7 +78,9 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
   const handleEdit = async () => {
     if (!onUpdate || !editForm.title.trim()) return;
     setSaving(true);
-    const cleanSteps = editSteps.filter(s => s.trim() !== '');
+    const cleanSteps = editSteps
+      .filter(s => s.name.trim() !== '')
+      .map(s => ({ ...s, materials: s.materials.filter(m => m.name.trim() !== '') }));
     const result = await onUpdate({ ...editForm, content: { steps: cleanSteps } });
     setSaving(false);
     if (!result?.error) {
@@ -78,14 +96,20 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
       category: template.category,
       icon: template.icon,
     });
-    setEditSteps(steps.length > 0 ? [...steps] : ['']);
+    const normalized = normalizeSteps(content);
+    setEditSteps(normalized.length > 0 ? normalized.map(s => ({ ...s, materials: [...s.materials] })) : [emptyStep()]);
+    setExpandedEditStep(null);
     setEditOpen(true);
   };
 
-  const addEditStep = () => setEditSteps(s => [...s, '']);
-  const removeEditStep = (i: number) => setEditSteps(s => s.filter((_, idx) => idx !== i));
-  const updateEditStep = (i: number, value: string) =>
-    setEditSteps(s => s.map((v, idx) => (idx === i ? value : v)));
+  // Edit step helpers
+  const addEditStep = () => { setEditSteps(s => [...s, emptyStep()]); setExpandedEditStep(editSteps.length); };
+  const removeEditStep = (i: number) => { setEditSteps(s => s.filter((_, idx) => idx !== i)); if (expandedEditStep === i) setExpandedEditStep(null); };
+  const updateEditStepName = (i: number, name: string) => setEditSteps(s => s.map((st, idx) => idx === i ? { ...st, name } : st));
+  const addEditMaterial = (si: number) => setEditSteps(s => s.map((st, idx) => idx === si ? { ...st, materials: [...st.materials, emptyMaterial()] } : st));
+  const removeEditMaterial = (si: number, mi: number) => setEditSteps(s => s.map((st, idx) => idx === si ? { ...st, materials: st.materials.filter((_, j) => j !== mi) } : st));
+  const updateEditMaterial = (si: number, mi: number, field: keyof StepMaterial, value: string | number) =>
+    setEditSteps(s => s.map((st, idx) => idx === si ? { ...st, materials: st.materials.map((m, j) => j === mi ? { ...m, [field]: value } : m) } : st));
 
   return (
     <>
@@ -115,13 +139,29 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
             >
               {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               {steps.length} etapa{steps.length !== 1 ? 's' : ''}
+              {totalMaterials > 0 && (
+                <span className="text-muted-foreground font-normal ml-1">
+                  · {totalMaterials} {totalMaterials === 1 ? 'material' : 'materiais'}
+                </span>
+              )}
             </button>
             {expanded && (
-              <ol className="mt-1.5 space-y-1 pl-4 list-decimal">
+              <div className="mt-1.5 space-y-1.5">
                 {steps.map((s, i) => (
-                  <li key={i} className="text-[11px] text-muted-foreground">{s}</li>
+                  <div key={i}>
+                    <p className="text-[11px] text-foreground font-medium">{i + 1}. {s.name}</p>
+                    {s.materials.length > 0 && (
+                      <ul className="ml-4 mt-0.5 space-y-0.5">
+                        {s.materials.map((m, mi) => (
+                          <li key={mi} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            <Package className="w-2.5 h-2.5" /> {m.name} — {m.quantity} {m.unit}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 ))}
-              </ol>
+              </div>
             )}
           </div>
         )}
@@ -200,29 +240,60 @@ const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCard
               </div>
             </div>
 
-            {/* Steps */}
+            {/* Steps with Materials */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Etapas</Label>
                 <Button type="button" variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={addEditStep}>
-                  <Plus className="w-3 h-3" /> Adicionar
+                  <Plus className="w-3 h-3" /> Adicionar Etapa
                 </Button>
               </div>
               <div className="space-y-2">
                 {editSteps.map((step, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    <span className="text-xs text-muted-foreground w-5 shrink-0">{i + 1}.</span>
-                    <Input
-                      placeholder={`Etapa ${i + 1}...`}
-                      value={step}
-                      onChange={e => updateEditStep(i, e.target.value)}
-                      className="h-8 text-sm"
-                    />
-                    {editSteps.length > 1 && (
-                      <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={() => removeEditStep(i)}>
-                        <X className="w-3.5 h-3.5 text-muted-foreground" />
+                  <div key={i} className="border border-border rounded-lg overflow-hidden">
+                    <div className="flex items-center gap-2 p-2 bg-secondary/30">
+                      <GripVertical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-xs text-muted-foreground w-5 shrink-0 font-medium">{i + 1}.</span>
+                      <Input
+                        placeholder={`Nome da etapa ${i + 1}...`}
+                        value={step.name}
+                        onChange={e => updateEditStepName(i, e.target.value)}
+                        className="h-8 text-sm border-0 bg-transparent shadow-none focus-visible:ring-0"
+                      />
+                      <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0"
+                        onClick={() => setExpandedEditStep(expandedEditStep === i ? null : i)}>
+                        {expandedEditStep === i ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                       </Button>
+                      {editSteps.length > 1 && (
+                        <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={() => removeEditStep(i)}>
+                          <X className="w-3.5 h-3.5 text-muted-foreground" />
+                        </Button>
+                      )}
+                    </div>
+                    {expandedEditStep === i && (
+                      <div className="p-3 space-y-2 bg-background">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                            <Package className="w-3 h-3" /> Materiais / Itens
+                          </span>
+                          <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-1 px-2" onClick={() => addEditMaterial(i)}>
+                            <Plus className="w-2.5 h-2.5" /> Material
+                          </Button>
+                        </div>
+                        {step.materials.length === 0 && (
+                          <p className="text-[11px] text-muted-foreground italic py-1">Nenhum material vinculado</p>
+                        )}
+                        {step.materials.map((mat, mi) => (
+                          <div key={mi} className="flex items-center gap-1.5">
+                            <Input placeholder="Material..." value={mat.name} onChange={e => updateEditMaterial(i, mi, 'name', e.target.value)} className="h-7 text-xs flex-1" />
+                            <Input type="number" placeholder="Qtd" value={mat.quantity} onChange={e => updateEditMaterial(i, mi, 'quantity', Number(e.target.value))} className="h-7 text-xs w-16" />
+                            <Input placeholder="un" value={mat.unit} onChange={e => updateEditMaterial(i, mi, 'unit', e.target.value)} className="h-7 text-xs w-14" />
+                            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={() => removeEditMaterial(i, mi)}>
+                              <X className="w-3 h-3 text-muted-foreground" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 ))}

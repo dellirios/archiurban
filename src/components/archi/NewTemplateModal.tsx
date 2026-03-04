@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, CalendarDays, Calculator, ClipboardCheck, FileText, X, GripVertical } from 'lucide-react';
+import { Plus, CalendarDays, Calculator, ClipboardCheck, FileText, X, GripVertical, Package, ChevronDown, ChevronUp } from 'lucide-react';
 import { categoryLabels, type TemplateCategory } from '@/data/templatesMockData';
 
 const iconOptions = [
@@ -14,9 +14,23 @@ const iconOptions = [
   { value: 'FileText', label: 'Documento', icon: FileText },
 ];
 
+export interface StepMaterial {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface TemplateStep {
+  name: string;
+  materials: StepMaterial[];
+}
+
 interface NewTemplateModalProps {
   onAdd: (t: { title: string; description: string; category: string; icon: string; content: any }) => Promise<any>;
 }
+
+const emptyStep = (): TemplateStep => ({ name: '', materials: [] });
+const emptyMaterial = (): StepMaterial => ({ name: '', quantity: 1, unit: 'un' });
 
 const NewTemplateModal = ({ onAdd }: NewTemplateModalProps) => {
   const [open, setOpen] = useState(false);
@@ -27,21 +41,44 @@ const NewTemplateModal = ({ onAdd }: NewTemplateModalProps) => {
     category: 'checklist' as TemplateCategory,
     icon: 'ClipboardCheck',
   });
-  const [steps, setSteps] = useState<string[]>(['']);
+  const [steps, setSteps] = useState<TemplateStep[]>([emptyStep()]);
+  const [expandedStep, setExpandedStep] = useState<number | null>(0);
 
-  const addStep = () => setSteps(s => [...s, '']);
-  const removeStep = (i: number) => setSteps(s => s.filter((_, idx) => idx !== i));
-  const updateStep = (i: number, value: string) =>
-    setSteps(s => s.map((v, idx) => (idx === i ? value : v)));
+  const addStep = () => {
+    setSteps(s => [...s, emptyStep()]);
+    setExpandedStep(steps.length);
+  };
+  const removeStep = (i: number) => {
+    setSteps(s => s.filter((_, idx) => idx !== i));
+    if (expandedStep === i) setExpandedStep(null);
+  };
+  const updateStepName = (i: number, name: string) =>
+    setSteps(s => s.map((st, idx) => (idx === i ? { ...st, name } : st)));
+
+  const addMaterial = (stepIdx: number) =>
+    setSteps(s => s.map((st, idx) => idx === stepIdx ? { ...st, materials: [...st.materials, emptyMaterial()] } : st));
+  const removeMaterial = (stepIdx: number, matIdx: number) =>
+    setSteps(s => s.map((st, idx) => idx === stepIdx ? { ...st, materials: st.materials.filter((_, mi) => mi !== matIdx) } : st));
+  const updateMaterial = (stepIdx: number, matIdx: number, field: keyof StepMaterial, value: string | number) =>
+    setSteps(s => s.map((st, idx) => idx === stepIdx ? {
+      ...st,
+      materials: st.materials.map((m, mi) => mi === matIdx ? { ...m, [field]: value } : m),
+    } : st));
 
   const handleSubmit = async () => {
     if (!form.title.trim()) return;
     setSaving(true);
-    const cleanSteps = steps.filter(s => s.trim() !== '');
+    const cleanSteps = steps
+      .filter(s => s.name.trim() !== '')
+      .map(s => ({
+        ...s,
+        materials: s.materials.filter(m => m.name.trim() !== ''),
+      }));
     await onAdd({ ...form, content: { steps: cleanSteps } });
     setSaving(false);
     setForm({ title: '', description: '', category: 'checklist', icon: 'ClipboardCheck' });
-    setSteps(['']);
+    setSteps([emptyStep()]);
+    setExpandedStep(0);
     setOpen(false);
   };
 
@@ -109,29 +146,81 @@ const NewTemplateModal = ({ onAdd }: NewTemplateModalProps) => {
             </div>
           </div>
 
-          {/* Steps */}
+          {/* Steps with Materials */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Etapas</Label>
               <Button type="button" variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={addStep}>
-                <Plus className="w-3 h-3" /> Adicionar
+                <Plus className="w-3 h-3" /> Adicionar Etapa
               </Button>
             </div>
             <div className="space-y-2">
               {steps.map((step, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <GripVertical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-xs text-muted-foreground w-5 shrink-0">{i + 1}.</span>
-                  <Input
-                    placeholder={`Etapa ${i + 1}...`}
-                    value={step}
-                    onChange={e => updateStep(i, e.target.value)}
-                    className="h-8 text-sm"
-                  />
-                  {steps.length > 1 && (
-                    <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={() => removeStep(i)}>
-                      <X className="w-3.5 h-3.5 text-muted-foreground" />
+                <div key={i} className="border border-border rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-2 p-2 bg-secondary/30">
+                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-xs text-muted-foreground w-5 shrink-0 font-medium">{i + 1}.</span>
+                    <Input
+                      placeholder={`Nome da etapa ${i + 1}...`}
+                      value={step.name}
+                      onChange={e => updateStepName(i, e.target.value)}
+                      className="h-8 text-sm border-0 bg-transparent shadow-none focus-visible:ring-0"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 shrink-0"
+                      onClick={() => setExpandedStep(expandedStep === i ? null : i)}
+                    >
+                      {expandedStep === i ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                     </Button>
+                    {steps.length > 1 && (
+                      <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={() => removeStep(i)}>
+                        <X className="w-3.5 h-3.5 text-muted-foreground" />
+                      </Button>
+                    )}
+                  </div>
+                  {expandedStep === i && (
+                    <div className="p-3 space-y-2 bg-background">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <Package className="w-3 h-3" /> Materiais / Itens
+                        </span>
+                        <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-1 px-2" onClick={() => addMaterial(i)}>
+                          <Plus className="w-2.5 h-2.5" /> Material
+                        </Button>
+                      </div>
+                      {step.materials.length === 0 && (
+                        <p className="text-[11px] text-muted-foreground italic py-1">Nenhum material vinculado</p>
+                      )}
+                      {step.materials.map((mat, mi) => (
+                        <div key={mi} className="flex items-center gap-1.5">
+                          <Input
+                            placeholder="Material..."
+                            value={mat.name}
+                            onChange={e => updateMaterial(i, mi, 'name', e.target.value)}
+                            className="h-7 text-xs flex-1"
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Qtd"
+                            value={mat.quantity}
+                            onChange={e => updateMaterial(i, mi, 'quantity', Number(e.target.value))}
+                            className="h-7 text-xs w-16"
+                          />
+                          <Input
+                            placeholder="un"
+                            value={mat.unit}
+                            onChange={e => updateMaterial(i, mi, 'unit', e.target.value)}
+                            className="h-7 text-xs w-14"
+                          />
+                          <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={() => removeMaterial(i, mi)}>
+                            <X className="w-3 h-3 text-muted-foreground" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               ))}
