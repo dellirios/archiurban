@@ -1,10 +1,9 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Building2 } from 'lucide-react';
-import TenantSetup from '@/pages/TenantSetup';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -19,11 +18,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) {
     return <Navigate to="/" replace />;
-  }
-
-  // Show tenant setup if user has no tenant_id
-  if (profile && !profile.tenant_id) {
-    return <TenantSetup />;
   }
 
   return <>{children}</>;
