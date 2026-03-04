@@ -321,6 +321,7 @@ export type Database = {
           description: string | null
           end_date: string | null
           id: string
+          is_portfolio_public: boolean
           name: string
           photos: Json | null
           priority: string
@@ -339,6 +340,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          is_portfolio_public?: boolean
           name: string
           photos?: Json | null
           priority?: string
@@ -357,6 +359,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          is_portfolio_public?: boolean
           name?: string
           photos?: Json | null
           priority?: string
@@ -523,25 +526,40 @@ export type Database = {
       }
       tenants: {
         Row: {
+          bio: string | null
           created_at: string
           id: string
+          instagram: string | null
+          linkedin: string | null
           logo: string | null
           name: string
           primary_color: string | null
+          slug: string | null
+          website: string | null
         }
         Insert: {
+          bio?: string | null
           created_at?: string
           id: string
+          instagram?: string | null
+          linkedin?: string | null
           logo?: string | null
           name: string
           primary_color?: string | null
+          slug?: string | null
+          website?: string | null
         }
         Update: {
+          bio?: string | null
           created_at?: string
           id?: string
+          instagram?: string | null
+          linkedin?: string | null
           logo?: string | null
           name?: string
           primary_color?: string | null
+          slug?: string | null
+          website?: string | null
         }
         Relationships: []
       }

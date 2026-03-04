@@ -24,6 +24,7 @@ import PurchasesPage from "./pages/PurchasesPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import ReportsPage from "./pages/ReportsPage";
 import PortfolioPage from "./pages/PortfolioPage";
+import PublicPortfolioPage from "./pages/PublicPortfolioPage";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/p/:slug" element={<PublicPortfolioPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/app" element={
