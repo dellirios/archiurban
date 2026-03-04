@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import TemplateCard from '@/components/archi/TemplateCard';
+import NewTemplateModal from '@/components/archi/NewTemplateModal';
 import { useTemplates } from '@/hooks/usePurchasesAndTemplates';
 import { categoryLabels, type TemplateCategory } from '@/data/templatesMockData';
-import { LayoutTemplate, Plus, Building2, Globe, Loader2 } from 'lucide-react';
+import { LayoutTemplate, Building2, Globe, Loader2 } from 'lucide-react';
 
 const categories: (TemplateCategory | 'all')[] = ['all', 'schedule', 'budget', 'checklist', 'contract'];
 
 const TemplatesPage = () => {
-  const { templates, loading } = useTemplates();
+  const { templates, loading, addTemplate } = useTemplates();
   const [category, setCategory] = useState<TemplateCategory | 'all'>('all');
 
   const filterByCategory = (items: typeof templates) =>
@@ -36,9 +36,7 @@ const TemplatesPage = () => {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Reutilize cronogramas, orçamentos e checklists</p>
         </div>
-        <Button size="sm" className="gap-1.5 text-xs">
-          <Plus className="w-4 h-4" /> Criar Template
-        </Button>
+        <NewTemplateModal onAdd={addTemplate} />
       </div>
 
       {/* Category filter */}
