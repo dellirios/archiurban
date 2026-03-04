@@ -18,6 +18,7 @@ import Clients from "./pages/Clients";
 import AppSettings from "./pages/AppSettings";
 import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
+import Chat from "./pages/Chat";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const AppRoutes = () => {
         <Route path="projects/:id" element={<ProjectDetails />} />
         <Route path="team" element={<Team />} />
         <Route path="clients" element={<Clients />} />
+        <Route path="chat" element={<Chat />} />
         <Route path="settings" element={<AppSettings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
