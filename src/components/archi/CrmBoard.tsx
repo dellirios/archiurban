@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useCrmLeads } from '@/hooks/useCrmAndFiles';
 import { useAuth } from '@/contexts/AuthContext';
-import { crmStages, temperatureLabels, temperatureColors, type LeadTemperature } from '@/data/crmMockData';
+import { crmStages, type LeadTemperature } from '@/data/crmMockData';
 import { formatCurrency } from '@/lib/types';
 import LeadCard from './LeadCard';
 import NewLeadModal from './NewLeadModal';
-import { Loader2 } from 'lucide-react';
+import CrmMetrics from './CrmMetrics';
+import LeadDetailModal from './LeadDetailModal';
+import type { CrmLead } from '@/hooks/useCrmAndFiles';
+import { Loader2, BarChart3, Columns3 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const CrmBoard = () => {
   const { profile } = useAuth();
@@ -13,6 +17,8 @@ const CrmBoard = () => {
   const { leads, loading, addLead, updateLead } = useCrmLeads();
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
+  const [showMetrics, setShowMetrics] = useState(true);
+  const [selectedLead, setSelectedLead] = useState<CrmLead | null>(null);
 
   const handleAddLead = async (lead: { name: string; email: string; phone: string; origin: string; estimatedValue: number }) => {
     await addLead({
@@ -43,19 +49,20 @@ const CrmBoard = () => {
     setDragOverCol(null);
   };
 
-  const mappedLeads = leads.map(l => ({
-    id: l.id,
-    name: l.name,
-    email: l.email,
-    phone: l.phone,
-    origin: l.origin,
-    estimatedValue: l.estimated_value,
-    temperature: l.temperature as LeadTemperature,
-    lastContact: l.last_contact,
-    stage: l.stage,
-  }));
+  const handleLeadClick = (lead: CrmLead) => {
+    setSelectedLead(lead);
+  };
 
-  const totalPipeline = mappedLeads.filter(l => l.stage !== 'closed').reduce((s, l) => s + l.estimatedValue, 0);
+  const handleUpdateLead = async (id: string, data: Partial<CrmLead>) => {
+    const result = await updateLead(id, data);
+    // Update selected lead in place
+    if (selectedLead?.id === id) {
+      setSelectedLead(prev => prev ? { ...prev, ...data } : null);
+    }
+    return result;
+  };
+
+  const totalPipeline = leads.filter(l => l.stage !== 'closed').reduce((s, l) => s + (l.estimated_value || 0), 0);
 
   if (loading) {
     return (
@@ -71,16 +78,30 @@ const CrmBoard = () => {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Funil Comercial</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {mappedLeads.length} leads · Pipeline: {formatCurrency(totalPipeline)}
+            {leads.length} leads · Pipeline: {formatCurrency(totalPipeline)}
           </p>
         </div>
-        <NewLeadModal onAdd={handleAddLead} />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowMetrics(!showMetrics)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
+              showMetrics ? 'bg-primary/10 text-primary border-primary/20' : 'bg-card text-muted-foreground border-border hover:text-foreground'
+            )}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            Métricas
+          </button>
+          <NewLeadModal onAdd={handleAddLead} />
+        </div>
       </div>
+
+      {showMetrics && <CrmMetrics leads={leads} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         {crmStages.map(col => {
-          const colLeads = mappedLeads.filter(l => l.stage === col.key);
-          const colTotal = colLeads.reduce((s, l) => s + l.estimatedValue, 0);
+          const colLeads = leads.filter(l => l.stage === col.key);
+          const colTotal = colLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
           const isOver = dragOverCol === col.key;
 
           return (
@@ -109,8 +130,19 @@ const CrmBoard = () => {
                     onDragStart={e => handleDragStart(e, lead.id)}
                     onDragEnd={() => { setDraggedId(null); setDragOverCol(null); }}
                     className={`cursor-grab active:cursor-grabbing ${draggedId === lead.id ? 'opacity-40' : ''}`}
+                    onClick={() => handleLeadClick(lead)}
                   >
-                    <LeadCard lead={lead} />
+                    <LeadCard lead={{
+                      id: lead.id,
+                      name: lead.name,
+                      email: lead.email,
+                      phone: lead.phone,
+                      origin: lead.origin,
+                      estimatedValue: lead.estimated_value || 0,
+                      temperature: lead.temperature as LeadTemperature,
+                      lastContact: lead.last_contact,
+                      stage: lead.stage,
+                    }} />
                   </div>
                 ))}
                 {colLeads.length === 0 && (
@@ -123,6 +155,13 @@ const CrmBoard = () => {
           );
         })}
       </div>
+
+      <LeadDetailModal
+        lead={selectedLead}
+        open={!!selectedLead}
+        onOpenChange={open => { if (!open) setSelectedLead(null); }}
+        onUpdate={handleUpdateLead}
+      />
     </div>
   );
 };
