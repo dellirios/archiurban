@@ -3,11 +3,13 @@ import { Plus, LayoutGrid, List } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import KanbanBoard from '@/components/archi/KanbanBoard';
 import ProjectTable from '@/components/archi/ProjectTable';
+import NewProjectModal from '@/components/archi/NewProjectModal';
 import { cn } from '@/lib/utils';
 
 const Projects = () => {
   const { tenantProjects } = useApp();
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
+  const [showNewProject, setShowNewProject] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -18,7 +20,6 @@ const Projects = () => {
           <p className="text-sm text-muted-foreground mt-1">{tenantProjects.length} projetos encontrados</p>
         </div>
         <div className="flex items-center gap-3">
-          {/* View Tabs */}
           <div className="flex bg-secondary rounded-lg p-0.5">
             <button
               onClick={() => setView('kanban')}
@@ -42,19 +43,23 @@ const Projects = () => {
             </button>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
+          <button
+            onClick={() => setShowNewProject(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+          >
             <Plus className="w-4 h-4" />
             Novo Projeto
           </button>
         </div>
       </div>
 
-      {/* Content */}
       {view === 'kanban' ? (
         <KanbanBoard projects={tenantProjects} />
       ) : (
         <ProjectTable projects={tenantProjects} />
       )}
+
+      <NewProjectModal open={showNewProject} onClose={() => setShowNewProject(false)} />
     </div>
   );
 };
