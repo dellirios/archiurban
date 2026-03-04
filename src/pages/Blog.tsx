@@ -4,11 +4,11 @@ import Navigation from "@/components/Navigation";
 import { blogPosts } from "@/data/blogPosts";
 
 const Blog = () => {
-  const [activeCategory, setActiveCategory] = useState("ALL");
+  const [activeCategory, setActiveCategory] = useState("TODOS");
   
-  const categories = ["ALL", "SUSTAINABILITY", "DESIGN", "URBAN PLANNING"];
+  const categories = ["TODOS", "SUSTENTABILIDADE", "DESIGN", "URBANISMO"];
   
-  const filteredPosts = activeCategory === "ALL" 
+  const filteredPosts = activeCategory === "TODOS" 
     ? blogPosts 
     : blogPosts.filter(post => post.category === activeCategory);
 
@@ -16,7 +16,6 @@ const Blog = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Hero Section */}
       <section className="pt-32 pb-20">
         <div className="container mx-auto px-6">
           <div className="max-w-7xl mx-auto">
@@ -25,15 +24,14 @@ const Blog = () => {
                 INSIGHTS
               </h1>
               <p className="text-xl text-muted-foreground max-w-3xl">
-                Exploring the intersection of architecture, design, and human experience 
-                through thoughtful analysis and contemporary perspectives.
+                Explorando a interseção entre arquitetura, design e experiência humana 
+                através de análises criteriosas e perspectivas contemporâneas.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Filter Categories */}
       <section className="pb-16">
         <div className="container mx-auto px-6">
           <div className="max-w-7xl mx-auto">
@@ -61,7 +59,6 @@ const Blog = () => {
         </div>
       </section>
 
-      {/* Blog Posts Grid */}
       <section className="pb-32">
         <div className="container mx-auto px-6">
           <div className="max-w-7xl mx-auto">
@@ -77,7 +74,6 @@ const Blog = () => {
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       
-                      {/* Category Badge */}
                       <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm px-3 py-1">
                         <span className="text-xs text-foreground font-medium">
                           {post.category}
@@ -104,7 +100,7 @@ const Blog = () => {
                       
                       <div className="pt-4">
                         <span className="text-minimal text-foreground hover:text-muted-foreground transition-colors duration-300 relative group-hover:underline">
-                          READ MORE
+                          LEIA MAIS
                         </span>
                       </div>
                     </div>
@@ -116,24 +112,23 @@ const Blog = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
       <section className="py-32 bg-muted">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-6xl font-light text-architectural mb-8">
-              Stay Informed
+              Fique Informado
             </h2>
             <p className="text-xl text-muted-foreground mb-12">
-              Subscribe to our newsletter for the latest insights on architecture and design
+              Assine nossa newsletter para os últimos insights sobre arquitetura e design
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
               <input 
                 type="email" 
-                placeholder="Enter your email"
+                placeholder="Digite seu e-mail"
                 className="flex-1 px-6 py-4 bg-background border border-border text-foreground placeholder:text-muted-foreground"
               />
               <button className="px-8 py-4 bg-foreground text-background hover:bg-muted-foreground transition-colors duration-300">
-                SUBSCRIBE
+                ASSINAR
               </button>
             </div>
           </div>
