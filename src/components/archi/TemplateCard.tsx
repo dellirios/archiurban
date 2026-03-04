@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { CalendarDays, Calculator, ClipboardCheck, FileText, Users, Play, Pencil, Copy, Check, Loader2 } from 'lucide-react';
+import { CalendarDays, Calculator, ClipboardCheck, FileText, Users, Play, Pencil, Copy, Check, Loader2, Plus, X, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categoryLabels, type TemplateCategory } from '@/data/templatesMockData';
@@ -24,23 +23,29 @@ const categoryColorMap: Record<string, string> = {
 
 interface TemplateCardProps {
   template: Template;
+  content?: any;
   onDuplicate?: () => Promise<any>;
-  onUpdate?: (data: { title: string; description: string; category: string; icon: string }) => Promise<any>;
+  onUpdate?: (data: { title: string; description: string; category: string; icon: string; content: any }) => Promise<any>;
 }
 
-const TemplateCard = ({ template, onDuplicate, onUpdate }: TemplateCardProps) => {
+const TemplateCard = ({ template, content, onDuplicate, onUpdate }: TemplateCardProps) => {
   const Icon = iconMap[template.icon] || FileText;
   const catLabel = categoryLabels[template.category] || template.category;
   const [duplicating, setDuplicating] = useState(false);
   const [duplicated, setDuplicated] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const steps: string[] = content?.steps || [];
+
   const [editForm, setEditForm] = useState({
     title: template.title,
     description: template.description,
     category: template.category as string,
     icon: template.icon,
   });
+  const [editSteps, setEditSteps] = useState<string[]>(steps.length > 0 ? steps : ['']);
 
   const handleDuplicate = async () => {
     if (!onDuplicate) return;
@@ -57,7 +62,8 @@ const TemplateCard = ({ template, onDuplicate, onUpdate }: TemplateCardProps) =>
   const handleEdit = async () => {
     if (!onUpdate || !editForm.title.trim()) return;
     setSaving(true);
-    const result = await onUpdate(editForm);
+    const cleanSteps = editSteps.filter(s => s.trim() !== '');
+    const result = await onUpdate({ ...editForm, content: { steps: cleanSteps } });
     setSaving(false);
     if (!result?.error) {
       toast.success('Template atualizado!');
@@ -72,8 +78,14 @@ const TemplateCard = ({ template, onDuplicate, onUpdate }: TemplateCardProps) =>
       category: template.category,
       icon: template.icon,
     });
+    setEditSteps(steps.length > 0 ? [...steps] : ['']);
     setEditOpen(true);
   };
+
+  const addEditStep = () => setEditSteps(s => [...s, '']);
+  const removeEditStep = (i: number) => setEditSteps(s => s.filter((_, idx) => idx !== i));
+  const updateEditStep = (i: number, value: string) =>
+    setEditSteps(s => s.map((v, idx) => (idx === i ? value : v)));
 
   return (
     <>
@@ -90,11 +102,31 @@ const TemplateCard = ({ template, onDuplicate, onUpdate }: TemplateCardProps) =>
         <h3 className="text-sm font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
           {template.title}
         </h3>
-        <p className="text-xs text-muted-foreground mb-4 line-clamp-2 flex-1">
+        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
           {template.description}
         </p>
 
-        <div className="flex items-center justify-between">
+        {/* Steps preview */}
+        {steps.length > 0 && (
+          <div className="mb-3">
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center gap-1 text-[11px] text-primary font-medium hover:underline"
+            >
+              {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {steps.length} etapa{steps.length !== 1 ? 's' : ''}
+            </button>
+            {expanded && (
+              <ol className="mt-1.5 space-y-1 pl-4 list-decimal">
+                {steps.map((s, i) => (
+                  <li key={i} className="text-[11px] text-muted-foreground">{s}</li>
+                ))}
+              </ol>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mt-auto">
           <span className="text-[10px] text-muted-foreground flex items-center gap-1">
             <Users className="w-3 h-3" /> {template.usageCount} usos
           </span>
@@ -130,7 +162,7 @@ const TemplateCard = ({ template, onDuplicate, onUpdate }: TemplateCardProps) =>
 
       {/* Edit Modal */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Template</DialogTitle>
           </DialogHeader>
@@ -140,8 +172,8 @@ const TemplateCard = ({ template, onDuplicate, onUpdate }: TemplateCardProps) =>
               <Input value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
-              <Label>Descrição</Label>
-              <Textarea rows={3} value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} />
+              <Label>Descrição breve</Label>
+              <Input value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -165,6 +197,35 @@ const TemplateCard = ({ template, onDuplicate, onUpdate }: TemplateCardProps) =>
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Steps */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Etapas</Label>
+                <Button type="button" variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={addEditStep}>
+                  <Plus className="w-3 h-3" /> Adicionar
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {editSteps.map((step, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-xs text-muted-foreground w-5 shrink-0">{i + 1}.</span>
+                    <Input
+                      placeholder={`Etapa ${i + 1}...`}
+                      value={step}
+                      onChange={e => updateEditStep(i, e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                    {editSteps.length > 1 && (
+                      <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={() => removeEditStep(i)}>
+                        <X className="w-3.5 h-3.5 text-muted-foreground" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

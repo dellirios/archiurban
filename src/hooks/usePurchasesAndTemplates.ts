@@ -169,11 +169,13 @@ export function useTemplates() {
 
   useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
 
-  const addTemplate = async (t: { title: string; description: string; category: string; icon: string }) => {
+  const addTemplate = async (t: { title: string; description: string; category: string; icon: string; content?: any }) => {
     if (!tenantId) return { error: new Error('No tenant') };
+    const { content, ...rest } = t;
     const { error } = await supabase.from('templates').insert({
       tenant_id: tenantId,
-      ...t,
+      ...rest,
+      content: content || {},
       created_by: profile?.full_name || user?.email || '',
       created_by_id: user?.id,
     } as any);

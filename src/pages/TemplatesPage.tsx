@@ -77,6 +77,7 @@ const TemplatesPage = () => {
                     usageCount: t.usage_count, community: t.community,
                     createdAt: t.created_at,
                   }}
+                  content={t.content}
                   onUpdate={(data) => updateTemplate(t.id, data)}
                 />
               ))}
@@ -102,6 +103,7 @@ const TemplatesPage = () => {
                     usageCount: t.usage_count, community: t.community,
                     createdAt: t.created_at,
                   }}
+                  content={t.content}
                   onDuplicate={() => duplicateTemplate(t)}
                   onUpdate={(data) => updateTemplate(t.id, data)}
                 />
