@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import InviteClientModal from '@/components/archi/InviteClientModal';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Phone, Clock, CheckCircle2 } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 interface InviteRow {
   id: string;
@@ -32,6 +33,46 @@ const Clients = () => {
 
   useEffect(() => {
     fetchInvites();
+
+    // Real-time subscription for invite status changes
+    const channel = supabase
+      .channel('client-invites-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'client_invites',
+          filter: `tenant_id=eq.${tenantId}`,
+        },
+        (payload) => {
+          const updated = payload.new as InviteRow;
+          if (updated.status === 'accepted') {
+            toast.success(`🎉 ${updated.client_name} aceitou o convite!`);
+          }
+          setInvites(prev =>
+            prev.map(inv => inv.id === updated.id ? { ...inv, ...updated } : inv)
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'client_invites',
+          filter: `tenant_id=eq.${tenantId}`,
+        },
+        (payload) => {
+          const newInvite = payload.new as InviteRow;
+          setInvites(prev => [newInvite, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [tenantId]);
 
   return (
