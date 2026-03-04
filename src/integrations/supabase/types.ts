@@ -187,6 +187,45 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          reference_id: string | null
+          reference_type: string | null
+          tenant_id: string
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id: string
+          title: string
+          type?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          reference_id?: string | null
+          reference_type?: string | null
+          tenant_id?: string
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -338,6 +377,57 @@ export type Database = {
           },
         ]
       }
+      purchase_requisitions: {
+        Row: {
+          created_at: string
+          id: string
+          material: string
+          notes: string | null
+          project_id: string | null
+          project_name: string
+          quantity: number
+          req_id: string
+          status: string
+          supplier: string
+          tenant_id: string
+          unit: string
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material: string
+          notes?: string | null
+          project_id?: string | null
+          project_name?: string
+          quantity?: number
+          req_id?: string
+          status?: string
+          supplier?: string
+          tenant_id: string
+          unit?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material?: string
+          notes?: string | null
+          project_id?: string | null
+          project_name?: string
+          quantity?: number
+          req_id?: string
+          status?: string
+          supplier?: string
+          tenant_id?: string
+          unit?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           access_level: Database["public"]["Enums"]["access_level"]
@@ -380,6 +470,54 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      templates: {
+        Row: {
+          category: string
+          community: boolean
+          content: Json | null
+          created_at: string
+          created_by: string | null
+          created_by_id: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          category?: string
+          community?: boolean
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          created_by_id?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          category?: string
+          community?: boolean
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          created_by_id?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          usage_count?: number
         }
         Relationships: []
       }

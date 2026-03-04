@@ -1,28 +1,29 @@
-import { useState } from 'react';
 import PurchaseTable from '@/components/archi/PurchaseTable';
 import PurchaseDrawer from '@/components/archi/PurchaseDrawer';
-import { mockPurchases, type PurchaseItem } from '@/data/purchasesMockData';
-import { ShoppingCart } from 'lucide-react';
+import { usePurchases } from '@/hooks/usePurchasesAndTemplates';
+import { ShoppingCart, Loader2 } from 'lucide-react';
 
 const PurchasesPage = () => {
-  const [items, setItems] = useState<PurchaseItem[]>(mockPurchases);
+  const { items, loading, addPurchase, updatePurchase } = usePurchases();
 
-  const handleAdd = (item: { material: string; projectName: string; quantity: number; unit: string; supplier: string; unitPrice: number }) => {
-    const newItem: PurchaseItem = {
-      id: String(items.length + 1),
-      reqId: `REQ-${String(items.length + 1).padStart(3, '0')}`,
+  const handleAdd = async (item: { material: string; projectName: string; quantity: number; unit: string; supplier: string; unitPrice: number }) => {
+    await addPurchase({
       material: item.material,
-      projectId: 'new',
-      projectName: item.projectName,
+      project_name: item.projectName,
       quantity: item.quantity,
       unit: item.unit,
       supplier: item.supplier,
-      unitPrice: item.unitPrice,
-      status: 'pending',
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
-    setItems(prev => [newItem, ...prev]);
+      unit_price: item.unitPrice,
+    });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -36,7 +37,7 @@ const PurchasesPage = () => {
         </div>
         <PurchaseDrawer onAdd={handleAdd} />
       </div>
-      <PurchaseTable items={items} />
+      <PurchaseTable items={items} onUpdateStatus={updatePurchase} />
     </div>
   );
 };
