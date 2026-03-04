@@ -50,15 +50,60 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          access_level: Database["public"]["Enums"]["access_level"]
+          active: boolean
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          role: string
+          tenant_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          role?: string
+          tenant_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          role?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      access_level: "viewer" | "editor" | "manager" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -185,6 +230,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      access_level: ["viewer", "editor", "manager", "admin"],
+    },
   },
 } as const
