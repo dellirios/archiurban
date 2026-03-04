@@ -4,7 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "@/contexts/AppContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import ArchiLayout from "@/layouts/ArchiLayout";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -22,15 +25,20 @@ const AppRoutes = () => {
   if (viewMode === 'client') {
     return (
       <Routes>
-        <Route path="*" element={<ClientPortal />} />
+        <Route path="/" element={<Home />} />
+        <Route path="*" element={
+          <ProtectedRoute><ClientPortal /></ProtectedRoute>
+        } />
       </Routes>
     );
   }
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/app" replace />} />
-      <Route path="/app" element={<ArchiLayout />}>
+      <Route path="/" element={<Home />} />
+      <Route path="/app" element={
+        <ProtectedRoute><ArchiLayout /></ProtectedRoute>
+      }>
         <Route index element={<Dashboard />} />
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectDetails />} />
@@ -48,11 +56,13 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AppProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AppProvider>
+      <AuthProvider>
+        <AppProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AppProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
