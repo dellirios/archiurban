@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_invites: {
+        Row: {
+          accepted_at: string | null
+          client_name: string
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          project_ids: string[] | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          client_name: string
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          project_ids?: string[] | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          client_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          project_ids?: string[] | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
