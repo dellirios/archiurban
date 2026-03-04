@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { type Project, priorityLabels, priorityColors } from '@/data/mockData';
+import { type Project, priorityLabels, priorityColors } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Calendar } from 'lucide-react';
 
@@ -10,6 +10,10 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ project, variant = 'kanban' }: ProjectCardProps) => {
   const navigate = useNavigate();
+
+  const clientInitials = project.client_name
+    ? project.client_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
 
   if (variant === 'kanban') {
     return (
@@ -41,14 +45,16 @@ const ProjectCard = ({ project, variant = 'kanban' }: ProjectCardProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
-              {project.clientAvatar}
+              {clientInitials}
             </div>
-            <span className="text-xs text-muted-foreground">{project.clientName}</span>
+            <span className="text-xs text-muted-foreground">{project.client_name || '—'}</span>
           </div>
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Calendar className="w-3 h-3" />
-            <span>{new Date(project.endDate).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' })}</span>
-          </div>
+          {project.end_date && (
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Calendar className="w-3 h-3" />
+              <span>{new Date(project.end_date).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' })}</span>
+            </div>
+          )}
         </div>
       </div>
     );

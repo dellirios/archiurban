@@ -1,4 +1,4 @@
-import { type Project, statusLabels, statusColors, priorityLabels, priorityColors, formatCurrency } from '@/data/mockData';
+import { type Project, statusLabels, statusColors, priorityLabels, priorityColors, formatCurrency } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface ProjectTableProps {
@@ -30,10 +30,7 @@ const ProjectTable = ({ projects }: ProjectTableProps) => {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
-                      {project.clientAvatar}
-                    </div>
-                    <span className="text-sm text-foreground">{project.clientName}</span>
+                    <span className="text-sm text-foreground">{project.client_name || '—'}</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -59,7 +56,7 @@ const ProjectTable = ({ projects }: ProjectTableProps) => {
                 </td>
                 <td className="px-4 py-3">
                   <span className="text-sm text-muted-foreground">
-                    {new Date(project.endDate).toLocaleDateString('pt-BR')}
+                    {project.end_date ? new Date(project.end_date).toLocaleDateString('pt-BR') : '—'}
                   </span>
                 </td>
               </tr>

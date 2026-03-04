@@ -1,4 +1,4 @@
-import { type ProjectPhoto } from '@/data/mockData';
+import { type ProjectPhoto } from '@/lib/types';
 
 interface PhotoGalleryProps {
   photos: ProjectPhoto[];

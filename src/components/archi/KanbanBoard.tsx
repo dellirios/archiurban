@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type Project } from '@/data/mockData';
+import { type Project } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 import ProjectCard from './ProjectCard';
 
@@ -15,7 +15,7 @@ const columns: { key: Project['status']; label: string; color: string }[] = [
 ];
 
 const KanbanBoard = ({ projects }: KanbanBoardProps) => {
-  const { updateProjectStatus } = useApp();
+  const { updateProject } = useApp();
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
 
@@ -35,7 +35,7 @@ const KanbanBoard = ({ projects }: KanbanBoardProps) => {
   const handleDrop = (e: React.DragEvent, newStatus: Project['status']) => {
     e.preventDefault();
     if (draggedId) {
-      updateProjectStatus(draggedId, newStatus);
+      updateProject(draggedId, { status: newStatus });
     }
     setDraggedId(null);
     setDragOverCol(null);

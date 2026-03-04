@@ -1,4 +1,4 @@
-import { type ProjectStage } from '@/data/mockData';
+import { type ProjectStage } from '@/lib/types';
 import { Check, Circle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
