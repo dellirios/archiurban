@@ -5,30 +5,36 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/types';
 import {
-  type PurchaseItem, type PurchaseStatus,
+  type PurchaseStatus,
   purchaseStatusLabels, purchaseStatusColors,
-  mockPurchases, mockSuppliers, mockProjects,
 } from '@/data/purchasesMockData';
+import type { PurchaseRow } from '@/hooks/usePurchasesAndTemplates';
 
 interface PurchaseTableProps {
-  items: PurchaseItem[];
+  items: PurchaseRow[];
+  onUpdateStatus?: (id: string, data: Partial<PurchaseRow>) => Promise<any>;
 }
 
-const PurchaseTable = ({ items }: PurchaseTableProps) => {
+const PurchaseTable = ({ items, onUpdateStatus }: PurchaseTableProps) => {
   const [filterProject, setFilterProject] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterSupplier, setFilterSupplier] = useState('all');
 
+  const uniqueProjects = useMemo(() => Array.from(new Set(items.map(i => i.project_name).filter(Boolean))).sort(), [items]);
+  const uniqueSuppliers = useMemo(() => Array.from(new Set(items.map(i => i.supplier).filter(Boolean))).sort(), [items]);
+
   const filtered = useMemo(() => {
     return items.filter(i => {
-      if (filterProject !== 'all' && i.projectName !== filterProject) return false;
+      if (filterProject !== 'all' && i.project_name !== filterProject) return false;
       if (filterStatus !== 'all' && i.status !== filterStatus) return false;
       if (filterSupplier !== 'all' && i.supplier !== filterSupplier) return false;
       return true;
     });
   }, [items, filterProject, filterStatus, filterSupplier]);
 
-  const totalValue = filtered.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+  const totalValue = filtered.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+
+  const statuses = Object.keys(purchaseStatusLabels) as PurchaseStatus[];
 
   return (
     <div className="space-y-4">
@@ -40,7 +46,7 @@ const PurchaseTable = ({ items }: PurchaseTableProps) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as Obras</SelectItem>
-            {mockProjects.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+            {uniqueProjects.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>
         </Select>
 
@@ -50,7 +56,7 @@ const PurchaseTable = ({ items }: PurchaseTableProps) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os Status</SelectItem>
-            {(Object.keys(purchaseStatusLabels) as PurchaseStatus[]).map(s => (
+            {statuses.map(s => (
               <SelectItem key={s} value={s}>{purchaseStatusLabels[s]}</SelectItem>
             ))}
           </SelectContent>
@@ -62,7 +68,7 @@ const PurchaseTable = ({ items }: PurchaseTableProps) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os Fornecedores</SelectItem>
-            {mockSuppliers.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            {uniqueSuppliers.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
 
@@ -83,23 +89,39 @@ const PurchaseTable = ({ items }: PurchaseTableProps) => {
               <TableHead className="text-[11px] font-semibold">Fornecedor</TableHead>
               <TableHead className="text-[11px] font-semibold text-right w-28">Vlr. Unit.</TableHead>
               <TableHead className="text-[11px] font-semibold text-right w-28">Vlr. Total</TableHead>
-              <TableHead className="text-[11px] font-semibold w-28">Status</TableHead>
+              <TableHead className="text-[11px] font-semibold w-32">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map(item => (
               <TableRow key={item.id} className="hover:bg-accent/30 transition-colors">
-                <TableCell className="text-xs font-mono text-muted-foreground">{item.reqId}</TableCell>
+                <TableCell className="text-xs font-mono text-muted-foreground">{item.req_id}</TableCell>
                 <TableCell className="text-xs font-medium text-foreground">{item.material}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{item.projectName}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{item.project_name}</TableCell>
                 <TableCell className="text-xs text-right">{item.quantity} {item.unit}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">{item.supplier}</TableCell>
-                <TableCell className="text-xs text-right font-medium">{formatCurrency(item.unitPrice)}</TableCell>
-                <TableCell className="text-xs text-right font-semibold">{formatCurrency(item.quantity * item.unitPrice)}</TableCell>
+                <TableCell className="text-xs text-right font-medium">{formatCurrency(item.unit_price)}</TableCell>
+                <TableCell className="text-xs text-right font-semibold">{formatCurrency(item.quantity * item.unit_price)}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className={cn('text-[10px] font-medium', purchaseStatusColors[item.status])}>
-                    {purchaseStatusLabels[item.status]}
-                  </Badge>
+                  {onUpdateStatus ? (
+                    <Select
+                      value={item.status}
+                      onValueChange={v => onUpdateStatus(item.id, { status: v })}
+                    >
+                      <SelectTrigger className={cn('h-6 text-[10px] border-0 px-2 w-28', purchaseStatusColors[item.status as PurchaseStatus])}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statuses.map(s => (
+                          <SelectItem key={s} value={s} className="text-xs">{purchaseStatusLabels[s]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant="secondary" className={cn('text-[10px] font-medium', purchaseStatusColors[item.status as PurchaseStatus])}>
+                      {purchaseStatusLabels[item.status as PurchaseStatus]}
+                    </Badge>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

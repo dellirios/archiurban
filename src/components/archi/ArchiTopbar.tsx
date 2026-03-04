@@ -1,17 +1,14 @@
 import { useState } from 'react';
-import { Search, Bell, ChevronDown, ArrowLeftRight, LogOut, Sun, Moon } from 'lucide-react';
+import { Search, ChevronDown, ArrowLeftRight, LogOut, Sun, Moon } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import NotificationBell from './NotificationBell';
 
 const ArchiTopbar = () => {
-  const { currentTenant, viewMode, setViewMode, notifications, theme, toggleTheme } = useApp();
+  const { currentTenant, viewMode, setViewMode, theme, toggleTheme } = useApp();
   const { profile, signOut } = useAuth();
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  const closeAll = () => { setShowNotifications(false); setShowUserMenu(false); };
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   const userName = profile?.full_name || 'Usuário';
   const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -48,31 +45,11 @@ const ArchiTopbar = () => {
         </div>
 
         {/* Notifications */}
-        <div className="relative">
-          <button onClick={() => { closeAll(); setShowNotifications(s => !s); }} className="relative p-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-            <Bell className="w-[18px] h-[18px]" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center rounded-full">{unreadCount}</span>
-            )}
-          </button>
-          {showNotifications && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-lg shadow-lg py-1 z-50">
-              <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Notificações</p>
-              {notifications.length === 0 && <p className="px-4 py-3 text-sm text-muted-foreground">Nenhuma notificação</p>}
-              {notifications.slice(0, 4).map(n => (
-                <div key={n.id} className={cn('px-4 py-3 hover:bg-accent transition-colors border-b border-border last:border-0', !n.read && 'bg-primary/5')}>
-                  <p className="text-sm font-medium text-foreground">{n.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{n.message}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{n.time}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <NotificationBell />
 
         {/* User Menu */}
         <div className="relative">
-          <button onClick={() => { closeAll(); setShowUserMenu(s => !s); }} className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-lg hover:bg-accent transition-colors">
+          <button onClick={() => { setShowUserMenu(s => !s); }} className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-lg hover:bg-accent transition-colors">
             <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">{userInitials}</div>
           </button>
           {showUserMenu && (
