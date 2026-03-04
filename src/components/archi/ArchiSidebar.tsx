@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, FolderKanban, DollarSign, Users, UserCircle, Settings,
   ChevronLeft, ChevronRight, Building2, LogOut, MessageSquare, TrendingUp,
-  ShoppingCart, LayoutTemplate,
+  ShoppingCart, LayoutTemplate, BarChart3, Briefcase,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,9 +15,11 @@ const navItems = [
   { icon: ShoppingCart, label: 'Compras', path: '/app/purchases' },
   { icon: MessageSquare, label: 'Chat', path: '/app/chat' },
   { icon: DollarSign, label: 'Financeiro', path: '#', disabled: true, badge: 'Em breve' },
+  { icon: BarChart3, label: 'Relatórios', path: '/app/reports' },
   { icon: Users, label: 'Equipe', path: '/app/team' },
   { icon: UserCircle, label: 'Clientes', path: '/app/clients' },
   { icon: LayoutTemplate, label: 'Templates', path: '/app/templates' },
+  { icon: Briefcase, label: 'Portfólio', path: '/app/portfolio' },
   { icon: Settings, label: 'Configurações', path: '/app/settings' },
 ];
 

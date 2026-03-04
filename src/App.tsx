@@ -22,6 +22,8 @@ import Chat from "./pages/Chat";
 import CrmPage from "./pages/CrmPage";
 import PurchasesPage from "./pages/PurchasesPage";
 import TemplatesPage from "./pages/TemplatesPage";
+import ReportsPage from "./pages/ReportsPage";
+import PortfolioPage from "./pages/PortfolioPage";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,8 @@ const AppRoutes = () => {
         <Route path="crm" element={<CrmPage />} />
         <Route path="purchases" element={<PurchasesPage />} />
         <Route path="templates" element={<TemplatesPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="settings" element={<AppSettings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
