@@ -2,36 +2,55 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Work from "./pages/Work";
-import Services from "./pages/Services";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AppProvider, useApp } from "@/contexts/AppContext";
+import ArchiLayout from "@/layouts/ArchiLayout";
+import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
+import Team from "./pages/Team";
+import Clients from "./pages/Clients";
+import AppSettings from "./pages/AppSettings";
+import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const AppRoutes = () => {
+  const { viewMode } = useApp();
+
+  if (viewMode === 'client') {
+    return (
+      <Routes>
+        <Route path="*" element={<ClientPortal />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/app" replace />} />
+      <Route path="/app" element={<ArchiLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="projects" element={<Projects />} />
+        <Route path="team" element={<Team />} />
+        <Route path="clients" element={<Clients />} />
+        <Route path="settings" element={<AppSettings />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/work" element={<Work />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogPost />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AppProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AppProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

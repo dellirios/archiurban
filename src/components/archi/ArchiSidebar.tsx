@@ -1,0 +1,97 @@
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  FolderKanban,
+  DollarSign,
+  Users,
+  UserCircle,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+} from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+import { cn } from '@/lib/utils';
+
+const navItems = [
+  { icon: LayoutDashboard, label: 'Visão Geral', path: '/app' },
+  { icon: FolderKanban, label: 'Projetos', path: '/app/projects' },
+  { icon: DollarSign, label: 'Financeiro', path: '#', disabled: true, badge: 'Em breve' },
+  { icon: Users, label: 'Equipe', path: '/app/team' },
+  { icon: UserCircle, label: 'Clientes', path: '/app/clients' },
+  { icon: Settings, label: 'Configurações', path: '/app/settings' },
+];
+
+const ArchiSidebar = () => {
+  const { sidebarOpen, setSidebarOpen, currentTenant } = useApp();
+  const location = useLocation();
+
+  return (
+    <aside
+      className={cn(
+        'fixed left-0 top-0 z-40 h-screen bg-card border-r border-border transition-all duration-300 flex flex-col',
+        sidebarOpen ? 'w-64' : 'w-[68px]'
+      )}
+    >
+      {/* Logo */}
+      <div className="h-16 flex items-center px-4 border-b border-border gap-3">
+        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+          <Building2 className="w-5 h-5 text-primary-foreground" />
+        </div>
+        {sidebarOpen && (
+          <div className="overflow-hidden">
+            <h1 className="text-sm font-semibold text-foreground truncate">ArchiUrban</h1>
+            <p className="text-[10px] text-muted-foreground truncate">{currentTenant.name}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        {navItems.map((item) => {
+          const isActive = item.path !== '#' && location.pathname === item.path;
+          return (
+            <Link
+              key={item.label}
+              to={item.disabled ? '#' : item.path}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group relative',
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : item.disabled
+                  ? 'text-muted-foreground/50 cursor-not-allowed'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+              )}
+              onClick={(e) => item.disabled && e.preventDefault()}
+            >
+              <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
+              {sidebarOpen && (
+                <>
+                  <span className="truncate">{item.label}</span>
+                  {item.badge && (
+                    <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                      {item.badge}
+                    </span>
+                  )}
+                </>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Collapse Toggle */}
+      <div className="p-3 border-t border-border">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="w-full flex items-center justify-center py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+        >
+          {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+        </button>
+      </div>
+    </aside>
+  );
+};
+
+export default ArchiSidebar;
