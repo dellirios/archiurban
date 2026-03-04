@@ -1,16 +1,13 @@
 import { useState } from 'react';
-import { BarChart3, PieChart as PieChartIcon, TrendingUp, CalendarIcon } from 'lucide-react';
+import { BarChart3, PieChart as PieChartIcon, TrendingUp, CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import KpiCard from '@/components/archi/KpiCard';
-import {
-  kpiData, cashFlowData, projectStatusData, leadOriginData, contractsEvolutionData,
-} from '@/data/reportsMockData';
+import { useReportsData } from '@/hooks/useReportsData';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell, LineChart, Line,
@@ -27,6 +24,15 @@ const PERIOD_OPTIONS = [
 const ReportsPage = () => {
   const [period, setPeriod] = useState('year');
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+  const { kpis, projectStatusData, leadOriginData, cashFlowData, contractsEvolutionData, loading } = useReportsData();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -78,7 +84,7 @@ const ReportsPage = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {kpiData.map(kpi => (
+        {kpis.map(kpi => (
           <KpiCard key={kpi.label} {...kpi} />
         ))}
       </div>
@@ -113,23 +119,19 @@ const ReportsPage = () => {
             <PieChartIcon className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Status dos Projetos</h2>
           </div>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie
-                data={projectStatusData}
-                cx="50%" cy="50%"
-                innerRadius={60} outerRadius={95}
-                paddingAngle={3} dataKey="value"
-                stroke="none"
-              >
-                {projectStatusData.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', fontSize: 12 }} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
+          {projectStatusData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={projectStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={3} dataKey="value" stroke="none">
+                  {projectStatusData.map((entry, i) => (<Cell key={i} fill={entry.fill} />))}
+                </Pie>
+                <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-16">Nenhum projeto encontrado</p>
+          )}
         </div>
 
         {/* Pie Chart — Lead Origin */}
@@ -138,23 +140,19 @@ const ReportsPage = () => {
             <PieChartIcon className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">Origem dos Leads</h2>
           </div>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie
-                data={leadOriginData}
-                cx="50%" cy="50%"
-                innerRadius={60} outerRadius={95}
-                paddingAngle={3} dataKey="value"
-                stroke="none"
-              >
-                {leadOriginData.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', fontSize: 12 }} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
+          {leadOriginData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={leadOriginData} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={3} dataKey="value" stroke="none">
+                  {leadOriginData.map((entry, i) => (<Cell key={i} fill={entry.fill} />))}
+                </Pie>
+                <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-16">Nenhum lead encontrado</p>
+          )}
         </div>
 
         {/* Line Chart — Contracts Evolution */}
@@ -169,15 +167,7 @@ const ReportsPage = () => {
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
               <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', fontSize: 12 }} />
-              <Line
-                type="monotone"
-                dataKey="contratos"
-                name="Contratos"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
-                dot={{ r: 4, fill: 'hsl(var(--primary))' }}
-                activeDot={{ r: 6 }}
-              />
+              <Line type="monotone" dataKey="contratos" name="Contratos" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
