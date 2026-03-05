@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search, Plus, MoreHorizontal, Eye, RefreshCw, Ban,
   Building2, Filter,
@@ -51,6 +52,7 @@ const AdminTenants = () => {
   const [addOpen, setAddOpen] = useState(false);
   const [newTenant, setNewTenant] = useState({ name: '', email: '', plan: 'Basic' as string });
 
+  const navigate = useNavigate();
   const filtered = mockTenants.filter(t => {
     const matchSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.id.toLowerCase().includes(search.toLowerCase());
@@ -146,7 +148,7 @@ const AdminTenants = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem onClick={() => toast.info(`Detalhes de ${t.name}`)}>
+                        <DropdownMenuItem onClick={() => navigate(`/admin/tenants/${t.id}`)}>
                           <Eye className="w-3.5 h-3.5 mr-2" /> Ver Detalhes
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => toast.info(`Alterar plano de ${t.name}`)}>

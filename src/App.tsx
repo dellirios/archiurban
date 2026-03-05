@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import SuperAdminRoute from "@/components/SuperAdminRoute";
 import ArchiLayout from "@/layouts/ArchiLayout";
 import Home from "./pages/Home";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -30,6 +31,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminBilling from "./pages/admin/AdminBilling";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminTenantDetail from "./pages/admin/AdminTenantDetail";
 
 const queryClient = new QueryClient();
 
@@ -71,9 +73,10 @@ const AppRoutes = () => {
         <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="settings" element={<AppSettings />} />
       </Route>
-      <Route path="/admin" element={<SuperAdminLayout />}>
+      <Route path="/admin" element={<SuperAdminRoute><SuperAdminLayout /></SuperAdminRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="tenants" element={<AdminTenants />} />
+        <Route path="tenants/:id" element={<AdminTenantDetail />} />
         <Route path="billing" element={<AdminBilling />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
