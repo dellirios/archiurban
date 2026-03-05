@@ -25,6 +25,11 @@ import TemplatesPage from "./pages/TemplatesPage";
 import ReportsPage from "./pages/ReportsPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import PublicPortfolioPage from "./pages/PublicPortfolioPage";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminTenants from "./pages/admin/AdminTenants";
+import AdminBilling from "./pages/admin/AdminBilling";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +70,12 @@ const AppRoutes = () => {
         <Route path="reports" element={<ReportsPage />} />
         <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="settings" element={<AppSettings />} />
+      </Route>
+      <Route path="/admin" element={<SuperAdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="tenants" element={<AdminTenants />} />
+        <Route path="billing" element={<AdminBilling />} />
+        <Route path="settings" element={<AdminSettings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
