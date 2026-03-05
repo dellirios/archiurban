@@ -23,6 +23,7 @@ interface ProjectPublic {
   client_name: string | null;
   status: string;
   photos: any;
+  cover_image_url: string | null;
 }
 
 const PublicPortfolioPage = () => {
@@ -47,7 +48,7 @@ const PublicPortfolioPage = () => {
 
       const { data: projData } = await supabase
         .from('projects')
-        .select('id, name, description, client_name, status, photos')
+        .select('id, name, description, client_name, status, photos, cover_image_url')
         .eq('tenant_id', tenantData.id)
         .eq('is_portfolio_public', true)
         .order('created_at', { ascending: false });
@@ -133,12 +134,12 @@ const PublicPortfolioPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map(project => {
               const photos = Array.isArray(project.photos) ? project.photos : [];
-              const firstPhoto = photos[0]?.url;
+              const displayImage = project.cover_image_url || photos[0]?.url;
               return (
                 <div key={project.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow group">
                   <div className="aspect-[16/10] bg-secondary/30 flex items-center justify-center relative overflow-hidden">
-                    {firstPhoto ? (
-                      <img src={firstPhoto} alt={project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    {displayImage ? (
+                      <img src={displayImage} alt={project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <ImageIcon className="w-10 h-10 text-muted-foreground/30" />
                     )}

@@ -317,6 +317,7 @@ export type Database = {
           budget: number | null
           client_email: string | null
           client_name: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           end_date: string | null
@@ -336,6 +337,7 @@ export type Database = {
           budget?: number | null
           client_email?: string | null
           client_name?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -355,6 +357,7 @@ export type Database = {
           budget?: number | null
           client_email?: string | null
           client_name?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
