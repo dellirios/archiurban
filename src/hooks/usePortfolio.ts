@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export function usePortfolio() {
   const { profile } = useAuth();
@@ -17,7 +18,7 @@ export function usePortfolio() {
     const [{ data: projData }, { data: tenData }] = await Promise.all([
       supabase
         .from('projects')
-        .select('id, name, description, client_name, status, photos, is_portfolio_public')
+        .select('id, name, description, client_name, status, photos, is_portfolio_public, cover_image_url')
         .eq('tenant_id', tenantId)
         .eq('status', 'completed')
         .order('created_at', { ascending: false }),
@@ -46,5 +47,30 @@ export function usePortfolio() {
     await fetchData();
   };
 
-  return { projects, tenantProfile, loading, toggleProjectPublic, updateTenantProfile, refetch: fetchData };
+  const uploadCoverImage = async (projectId: string, file: File) => {
+    const ext = file.name.split('.').pop();
+    const path = `${tenantId}/${projectId}/cover.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('portfolio-covers')
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+      toast.error('Erro ao fazer upload da imagem');
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('portfolio-covers')
+      .getPublicUrl(path);
+
+    await supabase.from('projects')
+      .update({ cover_image_url: urlData.publicUrl } as any)
+      .eq('id', projectId);
+
+    toast.success('Foto de capa atualizada!');
+    await fetchData();
+  };
+
+  return { projects, tenantProfile, loading, toggleProjectPublic, updateTenantProfile, uploadCoverImage, refetch: fetchData };
 }

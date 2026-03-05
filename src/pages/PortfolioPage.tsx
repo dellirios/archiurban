@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Briefcase, ExternalLink, Copy, Check, Instagram, Linkedin, Globe, ImageIcon, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Briefcase, ExternalLink, Copy, Check, Instagram, Linkedin, Globe, ImageIcon, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { usePortfolio } from '@/hooks/usePortfolio';
 
 const PortfolioPage = () => {
-  const { projects, tenantProfile, loading, toggleProjectPublic, updateTenantProfile } = usePortfolio();
+  const { projects, tenantProfile, loading, toggleProjectPublic, updateTenantProfile, uploadCoverImage } = usePortfolio();
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -156,8 +156,16 @@ const PortfolioPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {projects.map((project: any) => {
+              const coverUrl = project.cover_image_url || null;
               const photos = Array.isArray(project.photos) ? project.photos : [];
-              const firstPhoto = photos[0]?.url;
+              const displayImage = coverUrl || photos[0]?.url;
+
+              const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const file = e.target.files?.[0];
+                if (file) uploadCoverImage(project.id, file);
+                e.target.value = '';
+              };
+
               return (
                 <div
                   key={project.id}
@@ -165,14 +173,22 @@ const PortfolioPage = () => {
                     project.is_portfolio_public ? 'border-primary/40 ring-1 ring-primary/20' : 'border-border'
                   }`}
                 >
-                  <div className="relative aspect-[16/10] bg-secondary/30 flex items-center justify-center">
-                    {firstPhoto ? (
-                      <img src={firstPhoto} alt={project.name} className="w-full h-full object-cover" />
+                  <div className="relative aspect-[16/10] bg-secondary/30 flex items-center justify-center overflow-hidden">
+                    {displayImage ? (
+                      <img src={displayImage} alt={project.name} className="w-full h-full object-cover" />
                     ) : (
                       <ImageIcon className="w-10 h-10 text-muted-foreground/30" />
                     )}
+                    {/* Upload overlay */}
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors cursor-pointer">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-1 text-white">
+                        <Upload className="w-5 h-5" />
+                        <span className="text-[10px] font-medium">Alterar capa</span>
+                      </div>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                    </label>
                     {project.is_portfolio_public && (
-                      <Badge className="absolute top-2 right-2 text-[10px] bg-primary text-primary-foreground">
+                      <Badge className="absolute top-2 right-2 text-[10px] bg-primary text-primary-foreground z-10">
                         Público
                       </Badge>
                     )}
