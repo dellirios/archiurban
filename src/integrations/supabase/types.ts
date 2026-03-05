@@ -321,6 +321,7 @@ export type Database = {
           created_at: string
           description: string | null
           end_date: string | null
+          gallery: Json | null
           id: string
           is_portfolio_public: boolean
           name: string
@@ -341,6 +342,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          gallery?: Json | null
           id?: string
           is_portfolio_public?: boolean
           name: string
@@ -361,6 +363,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          gallery?: Json | null
           id?: string
           is_portfolio_public?: boolean
           name?: string
@@ -529,36 +532,48 @@ export type Database = {
       }
       tenants: {
         Row: {
+          accent_color: string | null
           bio: string | null
           created_at: string
+          hero_headline: string | null
+          hero_subheadline: string | null
           id: string
           instagram: string | null
           linkedin: string | null
           logo: string | null
+          logo_url: string | null
           name: string
           primary_color: string | null
           slug: string | null
           website: string | null
         }
         Insert: {
+          accent_color?: string | null
           bio?: string | null
           created_at?: string
+          hero_headline?: string | null
+          hero_subheadline?: string | null
           id: string
           instagram?: string | null
           linkedin?: string | null
           logo?: string | null
+          logo_url?: string | null
           name: string
           primary_color?: string | null
           slug?: string | null
           website?: string | null
         }
         Update: {
+          accent_color?: string | null
           bio?: string | null
           created_at?: string
+          hero_headline?: string | null
+          hero_subheadline?: string | null
           id?: string
           instagram?: string | null
           linkedin?: string | null
           logo?: string | null
+          logo_url?: string | null
           name?: string
           primary_color?: string | null
           slug?: string | null
