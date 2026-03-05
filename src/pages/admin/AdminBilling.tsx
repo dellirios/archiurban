@@ -1,16 +1,30 @@
 import { useState } from 'react';
 import {
-  CreditCard, Check, Star, Zap, Building2, ArrowUpRight,
-  Receipt, Calendar, Download,
+  CreditCard, Check, Star, Zap, Building2,
+  Receipt, Calendar, Download, Loader2, ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { stripeTiers, type TierKey } from '@/data/stripeTiers';
 
-const plans = [
+const plans: {
+  name: string;
+  tier: TierKey;
+  price: number;
+  period: string;
+  description: string;
+  features: string[];
+  popular?: boolean;
+  color: string;
+  icon: typeof Building2;
+  subscribers: number;
+}[] = [
   {
     name: 'Basic',
+    tier: 'basic',
     price: 97,
     period: '/mês',
     description: 'Para escritórios em fase inicial',
@@ -21,6 +35,7 @@ const plans = [
   },
   {
     name: 'Pro',
+    tier: 'pro',
     price: 197,
     period: '/mês',
     description: 'Para escritórios em crescimento',
@@ -32,6 +47,7 @@ const plans = [
   },
   {
     name: 'Premium',
+    tier: 'premium',
     price: 397,
     period: '/mês',
     description: 'Para escritórios consolidados',
@@ -82,7 +98,31 @@ const payStatusBadge = (s: string) => {
 };
 
 const AdminBilling = () => {
+  const [loadingTier, setLoadingTier] = useState<TierKey | null>(null);
   const totalMrr = mockSubscriptions.reduce((s, sub) => s + sub.amount, 0);
+
+  const handleCheckout = async (tier: TierKey) => {
+    const priceId = stripeTiers[tier].price_id;
+    if (priceId.includes('PLACEHOLDER')) {
+      toast.error('Este plano ainda não está configurado no Stripe. Crie o produto no Dashboard do Stripe e atualize o ID em stripeTiers.ts');
+      return;
+    }
+
+    setLoadingTier(tier);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao criar sessão de checkout');
+    } finally {
+      setLoadingTier(null);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -136,8 +176,18 @@ const AdminBilling = () => {
                     </li>
                   ))}
                 </ul>
-                <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => toast.info(`Editar plano ${plan.name}`)}>
-                  Editar Plano
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs gap-1.5"
+                  disabled={loadingTier === plan.tier}
+                  onClick={() => handleCheckout(plan.tier)}
+                >
+                  {loadingTier === plan.tier ? (
+                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...</>
+                  ) : (
+                    <><ExternalLink className="w-3.5 h-3.5" /> Subscrever via Stripe</>
+                  )}
                 </Button>
               </div>
             ))}
