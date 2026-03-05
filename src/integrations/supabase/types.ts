@@ -543,6 +543,7 @@ export type Database = {
           logo: string | null
           logo_url: string | null
           name: string
+          phone: string | null
           primary_color: string | null
           slug: string | null
           website: string | null
@@ -559,6 +560,7 @@ export type Database = {
           logo?: string | null
           logo_url?: string | null
           name: string
+          phone?: string | null
           primary_color?: string | null
           slug?: string | null
           website?: string | null
@@ -575,6 +577,7 @@ export type Database = {
           logo?: string | null
           logo_url?: string | null
           name?: string
+          phone?: string | null
           primary_color?: string | null
           slug?: string | null
           website?: string | null
