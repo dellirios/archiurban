@@ -34,6 +34,41 @@ interface ProjectPublic {
   gallery: GalleryImage[];
 }
 
+const useScrollReveal = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.unobserve(el); } },
+      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, isVisible };
+};
+
+const ScrollReveal = ({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) => {
+  const { ref, isVisible } = useScrollReveal();
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
+        transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 const PublicPortfolioPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [tenant, setTenant] = useState<TenantPublic | null>(null);
@@ -173,17 +208,20 @@ const PublicPortfolioPage = () => {
 
       {/* ── BIO SECTION ── */}
       {tenant.bio && (
-        <section className="max-w-3xl mx-auto px-6 py-20 text-center">
-          <div className="w-12 h-[2px] mx-auto mb-8" style={{ backgroundColor: accent }} />
-          <p className="text-lg leading-relaxed text-neutral-400">{tenant.bio}</p>
-        </section>
+        <ScrollReveal>
+          <section className="max-w-3xl mx-auto px-6 py-20 text-center">
+            <div className="w-12 h-[2px] mx-auto mb-8" style={{ backgroundColor: accent }} />
+            <p className="text-lg leading-relaxed text-neutral-400">{tenant.bio}</p>
+          </section>
+        </ScrollReveal>
       )}
 
       {/* ── PROJECTS ── */}
-      <section className="max-w-6xl mx-auto px-6 pb-20">
-        <h2 className="text-xs font-semibold tracking-[0.2em] uppercase mb-10" style={{ color: accent }}>
-          Projetos Selecionados
-        </h2>
+      <ScrollReveal>
+        <section className="max-w-6xl mx-auto px-6 pb-20">
+          <h2 className="text-xs font-semibold tracking-[0.2em] uppercase mb-10" style={{ color: accent }}>
+            Projetos Selecionados
+          </h2>
 
         {projects.length === 0 ? (
           <div className="text-center py-16 text-neutral-500">
@@ -196,45 +234,47 @@ const PublicPortfolioPage = () => {
               const displayImage = project.cover_image_url || (Array.isArray(project.photos) ? project.photos[0]?.url : null);
               const isEven = idx % 2 === 0;
               return (
-                <div
-                  key={project.id}
-                  className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-8 items-center cursor-pointer group`}
-                  onClick={() => project.gallery.length > 0 && setSelectedProject(project)}
-                >
-                  {/* Image */}
-                  <div className="flex-1 w-full overflow-hidden rounded-xl">
-                    {displayImage ? (
-                      <img
-                        src={displayImage}
-                        alt={project.name}
-                        className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="w-full aspect-[16/10] bg-neutral-800 flex items-center justify-center rounded-xl">
-                        <ImageIcon className="w-10 h-10 text-neutral-600" />
-                      </div>
-                    )}
+                <ScrollReveal key={project.id} delay={idx * 120}>
+                  <div
+                    className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-8 items-center cursor-pointer group`}
+                    onClick={() => project.gallery.length > 0 && setSelectedProject(project)}
+                  >
+                    {/* Image */}
+                    <div className="flex-1 w-full overflow-hidden rounded-xl">
+                      {displayImage ? (
+                        <img
+                          src={displayImage}
+                          alt={project.name}
+                          className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                      ) : (
+                        <div className="w-full aspect-[16/10] bg-neutral-800 flex items-center justify-center rounded-xl">
+                          <ImageIcon className="w-10 h-10 text-neutral-600" />
+                        </div>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className={`flex-1 space-y-3 ${isEven ? 'lg:pl-4' : 'lg:pr-4'}`}>
+                      <h3 className="text-2xl font-semibold text-white group-hover:text-opacity-80 transition-colors">
+                        {project.name}
+                      </h3>
+                      {project.description && (
+                        <p className="text-sm text-neutral-400 leading-relaxed">{project.description}</p>
+                      )}
+                      {project.gallery.length > 0 && (
+                        <p className="text-xs uppercase tracking-wider" style={{ color: accent }}>
+                          Ver galeria ({project.gallery.length} fotos) →
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  {/* Info */}
-                  <div className={`flex-1 space-y-3 ${isEven ? 'lg:pl-4' : 'lg:pr-4'}`}>
-                    <h3 className="text-2xl font-semibold text-white group-hover:text-opacity-80 transition-colors">
-                      {project.name}
-                    </h3>
-                    {project.description && (
-                      <p className="text-sm text-neutral-400 leading-relaxed">{project.description}</p>
-                    )}
-                    {project.gallery.length > 0 && (
-                      <p className="text-xs uppercase tracking-wider" style={{ color: accent }}>
-                        Ver galeria ({project.gallery.length} fotos) →
-                      </p>
-                    )}
-                  </div>
-                </div>
+                </ScrollReveal>
               );
             })}
           </div>
         )}
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* ── GALLERY LIGHTBOX ── */}
       {selectedProject && (
