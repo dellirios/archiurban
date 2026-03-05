@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Briefcase, ExternalLink, Copy, Check, Instagram, Linkedin, Globe,
-  ImageIcon, Loader2, Upload, Palette, Plus, X, Pencil, Image,
+  ImageIcon, Loader2, Upload, Palette, Plus, X, Pencil, Image, Phone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,7 @@ const PortfolioPage = () => {
   const publicUrl = `archiurban.com.br/p/${slug}`;
 
   const [profile, setProfile] = useState({
-    bio: '', instagram: '', linkedin: '', website: '',
+    bio: '', instagram: '', linkedin: '', website: '', phone: '',
     hero_headline: '', hero_subheadline: '', accent_color: '#c89b3c',
   });
 
@@ -41,6 +41,7 @@ const PortfolioPage = () => {
         instagram: tenantProfile.instagram || '',
         linkedin: tenantProfile.linkedin || '',
         website: tenantProfile.website || '',
+        phone: tenantProfile.phone || '',
         hero_headline: tenantProfile.hero_headline || '',
         hero_subheadline: tenantProfile.hero_subheadline || '',
         accent_color: tenantProfile.accent_color || '#c89b3c',
@@ -226,6 +227,11 @@ const PortfolioPage = () => {
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Website</Label>
                 <Input placeholder="www.seusite.com.br" value={profile.website} onChange={e => setProfile(p => ({ ...p, website: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> WhatsApp</Label>
+                <Input placeholder="+55 11 99999-9999" value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} />
+                <p className="text-[10px] text-muted-foreground">Será exibido como botão flutuante na página pública</p>
               </div>
               <div className="flex items-end">
                 <Button size="sm" className="text-xs" onClick={handleSaveProfile} disabled={saving}>
