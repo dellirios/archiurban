@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Instagram, Linkedin, Globe, ImageIcon, Loader2, Mail } from 'lucide-react';
+import { Building2, Instagram, Linkedin, Globe, ImageIcon, Loader2, Mail, MessageCircle } from 'lucide-react';
 
 interface TenantPublic {
   id: string;
@@ -16,6 +16,7 @@ interface TenantPublic {
   instagram: string;
   linkedin: string;
   website: string;
+  phone: string;
 }
 
 interface GalleryImage {
@@ -91,7 +92,7 @@ const PublicPortfolioPage = () => {
 
       const { data: tenantData } = await supabase
         .from('tenants')
-        .select('id, name, logo, logo_url, primary_color, accent_color, bio, hero_headline, hero_subheadline, instagram, linkedin, website')
+        .select('id, name, logo, logo_url, primary_color, accent_color, bio, hero_headline, hero_subheadline, instagram, linkedin, website, phone')
         .eq('slug', slug)
         .maybeSingle();
 
@@ -301,6 +302,20 @@ const PublicPortfolioPage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── FLOATING WHATSAPP BUTTON ── */}
+      {tenant.phone && (
+        <a
+          href={`https://wa.me/${tenant.phone.replace(/\D/g, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200"
+          style={{ backgroundColor: '#25D366' }}
+          aria-label="Contato via WhatsApp"
+        >
+          <MessageCircle className="w-6 h-6 text-white" fill="white" strokeWidth={0} />
+        </a>
       )}
 
       {/* ── FOOTER ── */}
