@@ -43,7 +43,7 @@ const AppRoutes = () => {
   if (viewMode === 'client') {
     return (
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={
