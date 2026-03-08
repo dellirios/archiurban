@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 import heroImage from "@/assets/hero-architecture.jpg";
 
 const Hero = () => {
