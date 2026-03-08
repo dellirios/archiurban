@@ -47,6 +47,7 @@ const ArchiSidebar = () => {
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = item.path !== '#' && (item.path === '/app' ? location.pathname === '/app' : location.pathname.startsWith(item.path));
+          const isLocked = item.gateKey ? !limits[item.gateKey] : false;
           return (
             <Link
               key={item.label}
@@ -55,6 +56,7 @@ const ArchiSidebar = () => {
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
                 isActive ? 'bg-primary text-primary-foreground shadow-sm'
                   : item.disabled ? 'text-muted-foreground/50 cursor-not-allowed'
+                  : isLocked ? 'text-muted-foreground/60 hover:bg-accent hover:text-accent-foreground'
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               )}
               onClick={(e) => item.disabled && e.preventDefault()}
@@ -64,7 +66,11 @@ const ArchiSidebar = () => {
                 <>
                   <span className="truncate">{item.label}</span>
                   {item.badge && <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{item.badge}</span>}
+                  {isLocked && !item.badge && <Lock className="ml-auto w-3.5 h-3.5 text-muted-foreground/50" />}
                 </>
+              )}
+              {!sidebarOpen && isLocked && (
+                <Lock className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 text-muted-foreground/50" />
               )}
             </Link>
           );
