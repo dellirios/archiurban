@@ -144,9 +144,31 @@ const AdminBilling = () => {
         <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
           <CreditCard className="w-5 h-5 text-primary" /> Planos & Faturação
         </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          MRR atual: <span className="font-semibold text-foreground">{fmt(totalMrr)}</span>
-        </p>
+        <div className="flex items-center justify-between mt-0.5">
+          <p className="text-sm text-muted-foreground">
+            MRR atual: <span className="font-semibold text-foreground">{fmt(totalMrr)}</span>
+            {subscription.subscribed && subscription.tier && (
+              <span className="ml-3">
+                · Plano atual: <Badge variant="outline" className="ml-1 text-[11px] bg-primary/10 text-primary border-primary/20">{subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}</Badge>
+              </span>
+            )}
+          </p>
+          {subscription.subscribed && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs gap-1.5"
+              disabled={loadingPortal}
+              onClick={handleManageSubscription}
+            >
+              {loadingPortal ? (
+                <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A abrir...</>
+              ) : (
+                <><Settings className="w-3.5 h-3.5" /> Gerir Subscrição</>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="plans" className="space-y-4">
