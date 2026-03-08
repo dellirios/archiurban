@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BarChart3, PieChart as PieChartIcon, TrendingUp, CalendarIcon, Loader2 } from 'lucide-react';
+import { BarChart3, PieChart as PieChartIcon, TrendingUp, CalendarIcon, Loader2, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import KpiCard from '@/components/archi/KpiCard';
 import { useReportsData } from '@/hooks/useReportsData';
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import UpgradeModal from '@/components/archi/UpgradeModal';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell, LineChart, Line,
@@ -25,6 +28,49 @@ const ReportsPage = () => {
   const [period, setPeriod] = useState('year');
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const { kpis, projectStatusData, leadOriginData, cashFlowData, contractsEvolutionData, loading } = useReportsData();
+  const { limits, isLoading: limitsLoading } = useSubscriptionLimits();
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const navigate = useNavigate();
+
+  if (!limits.advancedReports && !limitsLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground flex items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-primary" /> Análise de Resultados
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Acompanhe a performance do seu escritório</p>
+        </div>
+
+        <div className="flex flex-col items-center justify-center py-20 bg-card border border-border rounded-xl">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
+            <Lock className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-2">Relatórios disponíveis no plano Pro</h2>
+          <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
+            Visualize fluxo de caixa, evolução de contratos, origem de leads e muito mais.
+            Faça upgrade para o plano <span className="font-semibold text-primary">Pro</span> para desbloquear.
+          </p>
+          <div className="flex gap-3">
+            <Button variant="outline" size="sm" onClick={() => navigate('/app/dashboard')}>
+              Voltar ao Dashboard
+            </Button>
+            <Button size="sm" className="gap-1.5" onClick={() => setShowUpgrade(true)}>
+              <TrendingUp className="w-4 h-4" /> Ver Planos
+            </Button>
+          </div>
+        </div>
+
+        <UpgradeModal
+          open={showUpgrade}
+          onClose={() => setShowUpgrade(false)}
+          feature="Relatórios Avançados"
+          requiredTier="pro"
+          description="Analise a performance financeira, acompanhe KPIs e tome decisões com dados."
+        />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
