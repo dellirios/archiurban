@@ -7,7 +7,16 @@ import {
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+
+const gateLabels: Record<string, string> = {
+  crmEnabled: 'Disponível no plano Pro',
+  advancedReports: 'Disponível no plano Pro',
+  portfolioPremium: 'Disponível no plano Pro',
+  apiAccess: 'Disponível no plano Premium',
+  whiteLabel: 'Disponível no plano Premium',
+};
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Visão Geral', path: '/app' },
