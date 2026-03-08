@@ -27,6 +27,7 @@ const navItems = [
 const ArchiSidebar = () => {
   const { sidebarOpen, setSidebarOpen, currentTenant } = useApp();
   const { signOut } = useAuth();
+  const { limits } = useSubscriptionLimits();
   const location = useLocation();
 
   return (
