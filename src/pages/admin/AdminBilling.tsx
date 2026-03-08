@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
   CreditCard, Check, Star, Zap, Building2,
-  Receipt, Calendar, Download, Loader2, ExternalLink,
+  Receipt, Calendar, Download, Loader2, ExternalLink, Settings,
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -99,6 +100,8 @@ const payStatusBadge = (s: string) => {
 
 const AdminBilling = () => {
   const [loadingTier, setLoadingTier] = useState<TierKey | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+  const { subscription, refreshSubscription, openCustomerPortal } = useAuth();
   const totalMrr = mockSubscriptions.reduce((s, sub) => s + sub.amount, 0);
 
   const handleCheckout = async (tier: TierKey) => {
@@ -124,15 +127,48 @@ const AdminBilling = () => {
     }
   };
 
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true);
+    try {
+      await openCustomerPortal();
+    } catch {
+      toast.error('Erro ao abrir portal de gestão');
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-7xl">
       <div>
         <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
           <CreditCard className="w-5 h-5 text-primary" /> Planos & Faturação
         </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          MRR atual: <span className="font-semibold text-foreground">{fmt(totalMrr)}</span>
-        </p>
+        <div className="flex items-center justify-between mt-0.5">
+          <p className="text-sm text-muted-foreground">
+            MRR atual: <span className="font-semibold text-foreground">{fmt(totalMrr)}</span>
+            {subscription.subscribed && subscription.tier && (
+              <span className="ml-3">
+                · Plano atual: <Badge variant="outline" className="ml-1 text-[11px] bg-primary/10 text-primary border-primary/20">{subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}</Badge>
+              </span>
+            )}
+          </p>
+          {subscription.subscribed && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs gap-1.5"
+              disabled={loadingPortal}
+              onClick={handleManageSubscription}
+            >
+              {loadingPortal ? (
+                <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A abrir...</>
+              ) : (
+                <><Settings className="w-3.5 h-3.5" /> Gerir Subscrição</>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="plans" className="space-y-4">
@@ -176,19 +212,35 @@ const AdminBilling = () => {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs gap-1.5"
-                  disabled={loadingTier === plan.tier}
-                  onClick={() => handleCheckout(plan.tier)}
-                >
-                  {loadingTier === plan.tier ? (
-                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...</>
-                  ) : (
-                    <><ExternalLink className="w-3.5 h-3.5" /> Subscrever via Stripe</>
-                  )}
-                </Button>
+                {subscription.tier === plan.tier ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5 border-primary text-primary"
+                    onClick={handleManageSubscription}
+                    disabled={loadingPortal}
+                  >
+                    {loadingPortal ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A abrir...</>
+                    ) : (
+                      <><Settings className="w-3.5 h-3.5" /> Gerir Subscrição</>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5"
+                    disabled={loadingTier === plan.tier}
+                    onClick={() => handleCheckout(plan.tier)}
+                  >
+                    {loadingTier === plan.tier ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...</>
+                    ) : (
+                      <><ExternalLink className="w-3.5 h-3.5" /> Subscrever via Stripe</>
+                    )}
+                  </Button>
+                )}
               </div>
             ))}
           </div>
