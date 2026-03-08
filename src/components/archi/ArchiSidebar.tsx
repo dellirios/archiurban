@@ -7,7 +7,16 @@ import {
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+
+const gateLabels: Record<string, string> = {
+  crmEnabled: 'Disponível no plano Pro',
+  advancedReports: 'Disponível no plano Pro',
+  portfolioPremium: 'Disponível no plano Pro',
+  apiAccess: 'Disponível no plano Premium',
+  whiteLabel: 'Disponível no plano Premium',
+};
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Visão Geral', path: '/app' },
@@ -48,9 +57,10 @@ const ArchiSidebar = () => {
         {navItems.map((item) => {
           const isActive = item.path !== '#' && (item.path === '/app' ? location.pathname === '/app' : location.pathname.startsWith(item.path));
           const isLocked = item.gateKey ? !limits[item.gateKey] : false;
-          return (
+          const tooltipLabel = item.gateKey ? gateLabels[item.gateKey] : undefined;
+
+          const linkContent = (
             <Link
-              key={item.label}
               to={item.disabled ? '#' : item.path}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
@@ -74,6 +84,22 @@ const ArchiSidebar = () => {
               )}
             </Link>
           );
+
+          if (isLocked && tooltipLabel) {
+            return (
+              <Tooltip key={item.label} delayDuration={200}>
+                <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <Lock className="w-3 h-3" />
+                    {tooltipLabel}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return <div key={item.label}>{linkContent}</div>;
         })}
       </nav>
 
