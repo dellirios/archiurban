@@ -55,6 +55,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/pricing" element={<Pricing />} />
       <Route path="/p/:slug" element={<PublicPortfolioPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
