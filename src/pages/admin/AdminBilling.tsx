@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
   CreditCard, Check, Star, Zap, Building2,
-  Receipt, Calendar, Download, Loader2, ExternalLink,
+  Receipt, Calendar, Download, Loader2, ExternalLink, Settings,
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
