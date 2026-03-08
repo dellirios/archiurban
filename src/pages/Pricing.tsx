@@ -1,6 +1,7 @@
 import { Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -189,6 +190,55 @@ const Pricing = () => {
           ))}
         </div>
       </section>
+      {/* FAQ */}
+      <motion.section
+        className="container mx-auto px-6 pb-24 max-w-3xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mb-8">
+          Perguntas Frequentes
+        </h2>
+        <Accordion type="single" collapsible className="w-full space-y-2">
+          <AccordionItem value="q1" className="border border-border rounded-lg px-4">
+            <AccordionTrigger className="text-sm font-medium">Posso mudar de plano a qualquer momento?</AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground">
+              Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. A cobrança será ajustada proporcionalmente ao período restante.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="q2" className="border border-border rounded-lg px-4">
+            <AccordionTrigger className="text-sm font-medium">O plano Free tem alguma limitação de tempo?</AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground">
+              Não, o plano Free é gratuito para sempre. Você pode usá-lo indefinidamente com até 2 projetos e 1 usuário.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="q3" className="border border-border rounded-lg px-4">
+            <AccordionTrigger className="text-sm font-medium">Quais formas de pagamento são aceitas?</AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground">
+              Aceitamos cartões de crédito (Visa, Mastercard, Amex) e boleto bancário através do Stripe. Todos os pagamentos são processados de forma segura.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="q4" className="border border-border rounded-lg px-4">
+            <AccordionTrigger className="text-sm font-medium">O que acontece se eu ultrapassar o limite de projetos?</AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground">
+              Você não perderá acesso aos projetos existentes, mas não poderá criar novos até fazer upgrade para um plano com limite maior ou remover projetos.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="q5" className="border border-border rounded-lg px-4">
+            <AccordionTrigger className="text-sm font-medium">Como funciona o CRM integrado?</AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground">
+              O CRM está disponível nos planos Pro e Premium. Ele inclui funil Kanban, gestão de leads, histórico de interações e métricas de conversão — tudo integrado aos seus projetos.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="q6" className="border border-border rounded-lg px-4">
+            <AccordionTrigger className="text-sm font-medium">Posso cancelar minha assinatura?</AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground">
+              Sim, você pode cancelar a qualquer momento. Seu acesso permanece ativo até o final do período já pago, sem cobranças adicionais.
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </motion.section>
     </div>
   );
 };
