@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 import heroImage from "@/assets/hero-architecture.jpg";
 
 const Hero = () => {
@@ -22,6 +25,14 @@ const Hero = () => {
         <p className="text-xl md:text-2xl text-white/80 font-light tracking-wide max-w-2xl mx-auto reveal-delayed">
           Criando espaços que inspiram através de design consciente e qualidade incomparável
         </p>
+        <div className="mt-10 reveal-delayed">
+          <Link to="/login">
+            <Button size="lg" className="bg-white text-black hover:bg-white/90 text-base px-8 py-6 rounded-none tracking-widest font-light gap-3">
+              <LogIn className="h-5 w-5" />
+              ENTRAR
+            </Button>
+          </Link>
+        </div>
       </div>
       
       {/* Indicador de Rolagem */}
