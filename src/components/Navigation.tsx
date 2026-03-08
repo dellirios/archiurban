@@ -28,6 +28,9 @@ const Navigation = () => {
           <a href="/contact" className="text-minimal text-muted-foreground hover:text-foreground transition-colors duration-300">
             CONTATO
           </a>
+          <a href="/login" className="text-minimal text-muted-foreground hover:text-foreground transition-colors duration-300">
+            LOGIN
+          </a>
         </div>
 
         <div className="hidden md:flex items-center space-x-4">
@@ -62,6 +65,9 @@ const Navigation = () => {
             </a>
             <a href="/contact" className="block text-minimal text-muted-foreground hover:text-foreground transition-colors duration-300">
               CONTATO
+            </a>
+            <a href="/login" className="block text-minimal text-muted-foreground hover:text-foreground transition-colors duration-300">
+              LOGIN
             </a>
             
             <div className="pt-4 border-t border-border">

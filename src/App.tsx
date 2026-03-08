@@ -8,7 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SuperAdminRoute from "@/components/SuperAdminRoute";
 import ArchiLayout from "@/layouts/ArchiLayout";
-import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Index from "./pages/Index";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
@@ -42,7 +43,7 @@ const AppRoutes = () => {
   if (viewMode === 'client') {
     return (
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={
@@ -54,7 +55,8 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/p/:slug" element={<PublicPortfolioPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
