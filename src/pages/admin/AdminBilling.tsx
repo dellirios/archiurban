@@ -100,6 +100,8 @@ const payStatusBadge = (s: string) => {
 
 const AdminBilling = () => {
   const [loadingTier, setLoadingTier] = useState<TierKey | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+  const { subscription, refreshSubscription, openCustomerPortal } = useAuth();
   const totalMrr = mockSubscriptions.reduce((s, sub) => s + sub.amount, 0);
 
   const handleCheckout = async (tier: TierKey) => {
@@ -122,6 +124,17 @@ const AdminBilling = () => {
       toast.error(err.message || 'Erro ao criar sessão de checkout');
     } finally {
       setLoadingTier(null);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true);
+    try {
+      await openCustomerPortal();
+    } catch {
+      toast.error('Erro ao abrir portal de gestão');
+    } finally {
+      setLoadingPortal(false);
     }
   };
 
