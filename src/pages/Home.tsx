@@ -78,6 +78,11 @@ const Home = () => {
               Plataforma multi-tenant para escritórios de arquitetura.
               Gerencie projetos, equipes e clientes em um só lugar.
             </p>
+            <Link to="/pricing">
+              <Button variant="secondary" size="lg" className="mt-2">
+                Ver planos e preços
+              </Button>
+            </Link>
           </div>
           <p className="text-sm text-primary-foreground/50">© 2026 ArchiUrban. Todos os direitos reservados.</p>
         </div>

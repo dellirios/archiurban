@@ -72,7 +72,7 @@ const UpgradeModal = ({ open, onClose, feature, requiredTier, description }: Upg
               className="flex-1 text-sm gap-1.5"
               onClick={() => {
                 onClose();
-                navigate('/admin/billing');
+                navigate('/pricing');
               }}
             >
               Ver Planos <ArrowRight className="w-4 h-4" />

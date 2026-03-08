@@ -1,4 +1,5 @@
 import { Check, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -85,6 +86,15 @@ const plans = [
   },
 ];
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.12, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
+  }),
+};
+
 const Pricing = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -101,67 +111,81 @@ const Pricing = () => {
       </header>
 
       {/* Hero */}
-      <section className="py-20 text-center px-6">
+      <motion.section
+        className="py-20 text-center px-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
           Planos e Preços
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Escolha o plano ideal para o seu escritório. Comece grátis e escale conforme sua necessidade.
         </p>
-      </section>
+      </motion.section>
 
       {/* Plans Grid */}
       <section className="container mx-auto px-6 pb-24">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {plans.map((plan) => (
-            <Card
+          {plans.map((plan, i) => (
+            <motion.div
               key={plan.name}
-              className={cn(
-                'flex flex-col relative transition-shadow duration-300',
-                plan.highlight
-                  ? 'border-primary shadow-lg shadow-primary/10 scale-[1.02]'
-                  : 'border-border'
-              )}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              whileHover={{ scale: 1.03, y: -4 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
-              {plan.badge && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3">
-                  {plan.badge}
-                </Badge>
-              )}
-              <CardHeader className="text-center pb-2">
-                <CardTitle className="text-xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <div className="text-center mb-6">
-                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                  <span className="text-muted-foreground">{plan.period}</span>
-                </div>
-                <ul className="space-y-3">
-                  {plan.features.map((feature) => (
-                    <li key={feature.label} className="flex items-center gap-2 text-sm">
-                      {feature.included ? (
-                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                      ) : (
-                        <X className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-                      )}
-                      <span className={cn(!feature.included && 'text-muted-foreground/50')}>
-                        {feature.label}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={plan.highlight ? 'default' : 'outline'}
-                  asChild
-                >
-                  <Link to="/">{plan.cta}</Link>
-                </Button>
-              </CardFooter>
-            </Card>
+              <Card
+                className={cn(
+                  'flex flex-col relative h-full transition-shadow duration-300',
+                  plan.highlight
+                    ? 'border-primary shadow-lg shadow-primary/10'
+                    : 'border-border'
+                )}
+              >
+                {plan.badge && (
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3">
+                    {plan.badge}
+                  </Badge>
+                )}
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-xl">{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <div className="text-center mb-6">
+                    <span className="text-4xl font-bold text-foreground">{plan.price}</span>
+                    <span className="text-muted-foreground">{plan.period}</span>
+                  </div>
+                  <ul className="space-y-3">
+                    {plan.features.map((feature) => (
+                      <li key={feature.label} className="flex items-center gap-2 text-sm">
+                        {feature.included ? (
+                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                        ) : (
+                          <X className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
+                        )}
+                        <span className={cn(!feature.included && 'text-muted-foreground/50')}>
+                          {feature.label}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full"
+                    variant={plan.highlight ? 'default' : 'outline'}
+                    asChild
+                  >
+                    <Link to="/">{plan.cta}</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </section>
