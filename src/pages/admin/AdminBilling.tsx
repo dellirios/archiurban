@@ -212,19 +212,35 @@ const AdminBilling = () => {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs gap-1.5"
-                  disabled={loadingTier === plan.tier}
-                  onClick={() => handleCheckout(plan.tier)}
-                >
-                  {loadingTier === plan.tier ? (
-                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...</>
-                  ) : (
-                    <><ExternalLink className="w-3.5 h-3.5" /> Subscrever via Stripe</>
-                  )}
-                </Button>
+                {subscription.tier === plan.tier ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5 border-primary text-primary"
+                    onClick={handleManageSubscription}
+                    disabled={loadingPortal}
+                  >
+                    {loadingPortal ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A abrir...</>
+                    ) : (
+                      <><Settings className="w-3.5 h-3.5" /> Gerir Subscrição</>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs gap-1.5"
+                    disabled={loadingTier === plan.tier}
+                    onClick={() => handleCheckout(plan.tier)}
+                  >
+                    {loadingTier === plan.tier ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...</>
+                    ) : (
+                      <><ExternalLink className="w-3.5 h-3.5" /> Subscrever via Stripe</>
+                    )}
+                  </Button>
+                )}
               </div>
             ))}
           </div>
