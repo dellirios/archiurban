@@ -26,6 +26,7 @@ import TemplatesPage from "./pages/TemplatesPage";
 import ReportsPage from "./pages/ReportsPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import PublicPortfolioPage from "./pages/PublicPortfolioPage";
+import Pricing from "./pages/Pricing";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
