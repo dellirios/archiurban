@@ -240,6 +240,7 @@ const Pricing = () => {
         </Accordion>
       </motion.section>
     </div>
+  );
 };
 
 export default Pricing;
