@@ -286,8 +286,12 @@ export type Database = {
           notify_new_tenant: boolean
           platform_name: string
           require_email_verification: boolean
+          smtp_from_email: string
+          smtp_from_name: string
           smtp_host: string
+          smtp_password: string
           smtp_port: string
+          smtp_user: string
           stripe_webhook_secret: string
           support_email: string
           updated_at: string
@@ -306,8 +310,12 @@ export type Database = {
           notify_new_tenant?: boolean
           platform_name?: string
           require_email_verification?: boolean
+          smtp_from_email?: string
+          smtp_from_name?: string
           smtp_host?: string
+          smtp_password?: string
           smtp_port?: string
+          smtp_user?: string
           stripe_webhook_secret?: string
           support_email?: string
           updated_at?: string
@@ -326,8 +334,12 @@ export type Database = {
           notify_new_tenant?: boolean
           platform_name?: string
           require_email_verification?: boolean
+          smtp_from_email?: string
+          smtp_from_name?: string
           smtp_host?: string
+          smtp_password?: string
           smtp_port?: string
+          smtp_user?: string
           stripe_webhook_secret?: string
           support_email?: string
           updated_at?: string
