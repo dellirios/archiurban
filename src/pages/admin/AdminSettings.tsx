@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Settings, Globe, Shield, Bell, Palette, Database, Save, Loader2,
-  Mail, Key, ToggleLeft, CheckCircle2,
+  Mail, Key, ToggleLeft, CheckCircle2, Send,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,10 @@ interface PlatformSettings {
   defaultTrialDays: string;
   smtpHost: string;
   smtpPort: string;
+  smtpUser: string;
+  smtpPassword: string;
+  smtpFromName: string;
+  smtpFromEmail: string;
   notifyNewTenant: boolean;
   notifyNewPayment: boolean;
   notifyChurn: boolean;
@@ -41,8 +45,12 @@ const defaults: PlatformSettings = {
   requireEmailVerification: true,
   maxTenantsPerPlan: '100',
   defaultTrialDays: '14',
-  smtpHost: '',
-  smtpPort: '587',
+  smtpHost: 'smtp.hostinger.com',
+  smtpPort: '465',
+  smtpUser: '',
+  smtpPassword: '',
+  smtpFromName: '',
+  smtpFromEmail: '',
   notifyNewTenant: true,
   notifyNewPayment: true,
   notifyChurn: true,
@@ -54,6 +62,7 @@ const defaults: PlatformSettings = {
 const AdminSettings = () => {
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [sendingTest, setSendingTest] = useState(false);
   const [settings, setSettings] = useState<PlatformSettings>(defaults);
 
   useEffect(() => {
@@ -70,8 +79,12 @@ const AdminSettings = () => {
           requireEmailVerification: data.require_email_verification ?? true,
           maxTenantsPerPlan: String(data.max_tenants_per_plan || 100),
           defaultTrialDays: String(data.default_trial_days || 14),
-          smtpHost: data.smtp_host || '',
-          smtpPort: data.smtp_port || '587',
+          smtpHost: (data as any).smtp_host || 'smtp.hostinger.com',
+          smtpPort: (data as any).smtp_port || '465',
+          smtpUser: (data as any).smtp_user || '',
+          smtpPassword: (data as any).smtp_password || '',
+          smtpFromName: (data as any).smtp_from_name || '',
+          smtpFromEmail: (data as any).smtp_from_email || '',
           notifyNewTenant: data.notify_new_tenant ?? true,
           notifyNewPayment: data.notify_new_payment ?? true,
           notifyChurn: data.notify_churn ?? true,
@@ -101,6 +114,10 @@ const AdminSettings = () => {
       default_trial_days: Number(settings.defaultTrialDays) || 14,
       smtp_host: settings.smtpHost,
       smtp_port: settings.smtpPort,
+      smtp_user: settings.smtpUser,
+      smtp_password: settings.smtpPassword,
+      smtp_from_name: settings.smtpFromName,
+      smtp_from_email: settings.smtpFromEmail,
       notify_new_tenant: settings.notifyNewTenant,
       notify_new_payment: settings.notifyNewPayment,
       notify_churn: settings.notifyChurn,
@@ -117,6 +134,41 @@ const AdminSettings = () => {
     setSaving(false);
     if (error) { toast.error('Erro ao salvar: ' + error.message); return; }
     toast.success('Configurações salvas com sucesso!');
+  };
+
+  const handleTestEmail = async () => {
+    if (!settings.smtpUser || !settings.smtpPassword || !settings.smtpFromEmail) {
+      toast.error('Preencha todas as credenciais SMTP antes de testar');
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/send-email`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            to: settings.supportEmail || settings.smtpFromEmail,
+            subject: '🧪 Teste SMTP - ArchiUrban',
+            html: '<h2>Teste de Email</h2><p>Se você recebeu este email, sua configuração SMTP está funcionando corretamente!</p><p><strong>ArchiUrban Platform</strong></p>',
+          }),
+        }
+      );
+      const result = await res.json();
+      if (res.ok) {
+        toast.success('Email de teste enviado com sucesso!');
+      } else {
+        toast.error('Erro ao enviar: ' + (result.error || 'Erro desconhecido'));
+      }
+    } catch (err: any) {
+      toast.error('Erro ao enviar email de teste: ' + err.message);
+    }
+    setSendingTest(false);
   };
 
   if (loadingData) {
@@ -244,17 +296,44 @@ const AdminSettings = () => {
       <section className="bg-card border border-border rounded-xl p-6 space-y-5">
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">Configuração de Email (SMTP)</h2>
+          <h2 className="text-sm font-semibold text-foreground">Configuração de Email (SMTP Hostinger)</h2>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Configure as credenciais do seu servidor SMTP para envio de emails transacionais (notificações, convites, etc.)
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Host SMTP</Label>
-            <Input placeholder="smtp.exemplo.com" value={settings.smtpHost} onChange={e => update('smtpHost', e.target.value)} />
+            <Input placeholder="smtp.hostinger.com" value={settings.smtpHost} onChange={e => update('smtpHost', e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label>Porta SMTP</Label>
-            <Input type="number" value={settings.smtpPort} onChange={e => update('smtpPort', e.target.value)} />
+            <Input type="number" placeholder="465" value={settings.smtpPort} onChange={e => update('smtpPort', e.target.value)} />
           </div>
+          <div className="space-y-1.5">
+            <Label>Usuário SMTP (Email)</Label>
+            <Input type="email" placeholder="contato@seudominio.com" value={settings.smtpUser} onChange={e => update('smtpUser', e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Senha SMTP</Label>
+            <Input type="password" placeholder="••••••••" value={settings.smtpPassword} onChange={e => update('smtpPassword', e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Nome do Remetente</Label>
+            <Input placeholder="ArchiUrban" value={settings.smtpFromName} onChange={e => update('smtpFromName', e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Email do Remetente</Label>
+            <Input type="email" placeholder="contato@seudominio.com" value={settings.smtpFromEmail} onChange={e => update('smtpFromEmail', e.target.value)} />
+          </div>
+        </div>
+        <div className="flex gap-2 pt-2">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={handleTestEmail} disabled={sendingTest}>
+            {sendingTest ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</> : <><Send className="w-3.5 h-3.5" /> Enviar Email de Teste</>}
+          </Button>
+          <p className="text-[10px] text-muted-foreground self-center">
+            Salve as configurações antes de enviar o teste
+          </p>
         </div>
       </section>
 
