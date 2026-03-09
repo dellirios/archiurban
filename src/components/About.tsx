@@ -1,67 +1,93 @@
+import { motion } from "framer-motion";
+import { Building2, Users, FolderOpen } from "lucide-react";
+
 const About = () => {
+  const steps = [
+    {
+      icon: Building2,
+      step: "01",
+      title: "Crie seu escritório",
+      description: "Cadastre-se, personalize seu ambiente e convide os membros da equipe com diferentes níveis de acesso.",
+    },
+    {
+      icon: FolderOpen,
+      step: "02",
+      title: "Gerencie tudo em um lugar",
+      description: "Crie projetos, organize arquivos, acompanhe cronogramas, orçamentos e converse com clientes.",
+    },
+    {
+      icon: Users,
+      step: "03",
+      title: "Conecte seus clientes",
+      description: "Convide clientes para acompanhar o progresso pelo portal exclusivo com fotos, documentos e chat.",
+    },
+  ];
+
   return (
-    <section id="about" className="py-32 bg-muted/20">
+    <section id="about" className="py-24 lg:py-32 bg-muted/30">
       <div className="container mx-auto px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-20 items-center">
-            <div>
-              <h2 className="text-minimal text-muted-foreground mb-4">POR QUE NOS ESCOLHER</h2>
-              <h3 className="text-4xl md:text-6xl font-light text-architectural mb-12">
-                Feito Por Quem
-                <br />
-                Entende Arquitetura
-              </h3>
-              
-              <div className="space-y-8">
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Diferente de ferramentas genéricas de gestão, nossa plataforma foi 
-                  projetada especificamente para o fluxo de trabalho de escritórios 
-                  de arquitetura — do briefing ao habite-se.
-                </p>
-                
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Centralize a gestão do seu escritório, reduza retrabalho e ofereça 
-                  uma experiência profissional aos seus clientes com portal exclusivo, 
-                  chat integrado e acompanhamento em tempo real.
-                </p>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <span className="inline-block text-xs font-medium tracking-widest text-primary uppercase mb-3 bg-primary/5 px-4 py-1.5 rounded-full">
+                Como funciona
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
+                3 passos para modernizar seu escritório
+              </h2>
+              <p className="text-lg text-muted-foreground leading-relaxed mb-4">
+                Diferente de ferramentas genéricas, o ArchiUrban foi projetado para o fluxo de trabalho 
+                real de escritórios de arquitetura — do briefing ao habite-se.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Centralize gestão, reduza retrabalho e ofereça uma experiência profissional 
+                aos seus clientes com portal exclusivo e acompanhamento em tempo real.
+              </p>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-6 mt-10 pt-8 border-t border-border">
+                {[
+                  { value: "100%", label: "Na nuvem" },
+                  { value: "24/7", label: "Disponível" },
+                  { value: "SSL", label: "Seguro" },
+                ].map((stat, i) => (
+                  <div key={i} className="text-center">
+                    <p className="text-2xl font-bold text-primary">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{stat.label}</p>
+                  </div>
+                ))}
               </div>
-            </div>
-            
-            <div className="space-y-12">
-              <div>
-                <h4 className="text-minimal text-muted-foreground mb-6">COMO FUNCIONA</h4>
-                <div className="space-y-6">
-                  <div className="border-l-2 border-primary pl-6">
-                    <h5 className="text-lg font-medium mb-2">1. Cadastre seu escritório</h5>
-                    <p className="text-muted-foreground">Crie sua conta, personalize seu ambiente e convide sua equipe</p>
-                  </div>
-                  <div className="border-l-2 border-primary pl-6">
-                    <h5 className="text-lg font-medium mb-2">2. Gerencie projetos</h5>
-                    <p className="text-muted-foreground">Crie projetos, organize arquivos, acompanhe cronogramas e orçamentos</p>
-                  </div>
-                  <div className="border-l-2 border-primary pl-6">
-                    <h5 className="text-lg font-medium mb-2">3. Conecte seus clientes</h5>
-                    <p className="text-muted-foreground">Convide clientes para acompanhar o progresso pelo portal exclusivo</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="pt-8 border-t border-border">
-                <div className="grid grid-cols-3 gap-8 text-center">
-                  <div>
-                    <p className="text-3xl font-light text-primary">100%</p>
-                    <p className="text-minimal text-muted-foreground mt-1">NA NUVEM</p>
+            </motion.div>
+
+            {/* Right - Steps */}
+            <div className="space-y-6">
+              {steps.map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15, duration: 0.5 }}
+                  className="relative flex gap-5 p-6 bg-card rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <step.icon className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-3xl font-light text-primary">24/7</p>
-                    <p className="text-minimal text-muted-foreground mt-1">DISPONÍVEL</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-bold text-primary">{step.step}</span>
+                      <h3 className="font-semibold text-foreground">{step.title}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
                   </div>
-                  <div>
-                    <p className="text-3xl font-light text-primary">SSL</p>
-                    <p className="text-minimal text-muted-foreground mt-1">SEGURO</p>
-                  </div>
-                </div>
-              </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
