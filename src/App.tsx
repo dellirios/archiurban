@@ -90,6 +90,7 @@ const AppRoutes = () => {
         <Route path="tenants" element={<AdminTenants />} />
         <Route path="tenants/:id" element={<AdminTenantDetail />} />
         <Route path="billing" element={<AdminBilling />} />
+        <Route path="team" element={<AdminTeam />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
