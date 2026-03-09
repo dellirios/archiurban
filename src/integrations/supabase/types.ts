@@ -271,6 +271,69 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          allow_signups: boolean
+          api_rate_limit: number
+          custom_css: string
+          default_language: string
+          default_trial_days: number
+          id: string
+          maintenance_mode: boolean
+          max_tenants_per_plan: number
+          notify_churn: boolean
+          notify_new_payment: boolean
+          notify_new_tenant: boolean
+          platform_name: string
+          require_email_verification: boolean
+          smtp_host: string
+          smtp_port: string
+          stripe_webhook_secret: string
+          support_email: string
+          updated_at: string
+        }
+        Insert: {
+          allow_signups?: boolean
+          api_rate_limit?: number
+          custom_css?: string
+          default_language?: string
+          default_trial_days?: number
+          id?: string
+          maintenance_mode?: boolean
+          max_tenants_per_plan?: number
+          notify_churn?: boolean
+          notify_new_payment?: boolean
+          notify_new_tenant?: boolean
+          platform_name?: string
+          require_email_verification?: boolean
+          smtp_host?: string
+          smtp_port?: string
+          stripe_webhook_secret?: string
+          support_email?: string
+          updated_at?: string
+        }
+        Update: {
+          allow_signups?: boolean
+          api_rate_limit?: number
+          custom_css?: string
+          default_language?: string
+          default_trial_days?: number
+          id?: string
+          maintenance_mode?: boolean
+          max_tenants_per_plan?: number
+          notify_churn?: boolean
+          notify_new_payment?: boolean
+          notify_new_tenant?: boolean
+          platform_name?: string
+          require_email_verification?: boolean
+          smtp_host?: string
+          smtp_port?: string
+          stripe_webhook_secret?: string
+          support_email?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -621,6 +684,7 @@ export type Database = {
           phone: string | null
           primary_color: string | null
           slug: string | null
+          status: string
           website: string | null
         }
         Insert: {
@@ -638,6 +702,7 @@ export type Database = {
           phone?: string | null
           primary_color?: string | null
           slug?: string | null
+          status?: string
           website?: string | null
         }
         Update: {
@@ -655,6 +720,7 @@ export type Database = {
           phone?: string | null
           primary_color?: string | null
           slug?: string | null
+          status?: string
           website?: string | null
         }
         Relationships: []
