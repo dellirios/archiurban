@@ -1,24 +1,46 @@
+import { FolderKanban, Users, FileText, BarChart3, MessageSquare, Layout, ShieldCheck, Globe } from "lucide-react";
+
 const Services = () => {
-  const services = [
+  const features = [
     {
-      number: "01",
-      title: "RESIDENCIAL",
-      description: "Criando lares que refletem estilos de vida individuais mantendo a integridade arquitetônica"
+      icon: FolderKanban,
+      title: "GESTÃO DE PROJETOS",
+      description: "Kanban, cronogramas e acompanhamento de progresso para cada obra e projeto do escritório"
     },
     {
-      number: "02", 
-      title: "COMERCIAL",
-      description: "Projetando espaços funcionais que aprimoram ambientes empresariais e experiências dos usuários"
+      icon: Users,
+      title: "CRM INTEGRADO",
+      description: "Pipeline de leads, funil de vendas e histórico de interações para converter mais clientes"
     },
     {
-      number: "03",
-      title: "RENOVAÇÃO",
-      description: "Transformando estruturas existentes com sensibilidade contemporânea e práticas sustentáveis"
+      icon: FileText,
+      title: "DOCUMENTOS & ARQUIVOS",
+      description: "Organize plantas, contratos e documentos por projeto com controle de versão e acesso"
     },
     {
-      number: "04",
-      title: "CONSULTORIA",
-      description: "Oferecendo orientação especializada em direção de design, planejamento e soluções arquitetônicas"
+      icon: BarChart3,
+      title: "RELATÓRIOS & FINANÇAS",
+      description: "Dashboards com KPIs, controle de orçamento e requisições de compra de materiais"
+    },
+    {
+      icon: MessageSquare,
+      title: "CHAT COM CLIENTES",
+      description: "Comunicação direta por projeto com histórico completo e notificações em tempo real"
+    },
+    {
+      icon: Globe,
+      title: "PORTFÓLIO PÚBLICO",
+      description: "Página personalizada para exibir seus melhores projetos e atrair novos clientes"
+    },
+    {
+      icon: Layout,
+      title: "TEMPLATES",
+      description: "Modelos reutilizáveis de projetos, checklists e documentos para padronizar processos"
+    },
+    {
+      icon: ShieldCheck,
+      title: "MULTI-TENANT",
+      description: "Cada escritório tem seu ambiente isolado e seguro com controle de acesso por função"
     }
   ];
 
@@ -26,29 +48,27 @@ const Services = () => {
     <section id="services" className="py-32 bg-background">
       <div className="container mx-auto px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20">
-            <h2 className="text-minimal text-muted-foreground mb-4">SERVIÇOS</h2>
-            <h3 className="text-4xl md:text-6xl font-light text-architectural">
-              O Que Fazemos
+          <div className="mb-20 text-center">
+            <h2 className="text-minimal text-muted-foreground mb-4">FUNCIONALIDADES</h2>
+            <h3 className="text-4xl md:text-6xl font-light text-architectural mb-6">
+              Tudo Que Seu Escritório Precisa
             </h3>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Uma plataforma pensada para a rotina de escritórios de arquitetura, 
+              do primeiro contato com o cliente até a entrega final do projeto.
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-x-20 gap-y-16">
-            {services.map((service, index) => (
-              <div key={index} className="group">
-                <div className="flex items-start space-x-6">
-                  <span className="text-minimal text-muted-foreground font-medium">
-                    {service.number}
-                  </span>
-                  <div>
-                    <h4 className="text-2xl font-light mb-4 text-architectural group-hover:text-muted-foreground transition-colors duration-500">
-                      {service.title}
-                    </h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {service.description}
-                    </p>
-                  </div>
-                </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="group p-6 border border-border rounded-lg hover:border-primary/30 hover:bg-accent/50 transition-all duration-300">
+                <feature.icon className="h-8 w-8 text-primary mb-4" />
+                <h4 className="text-sm font-medium mb-3 tracking-wider text-foreground">
+                  {feature.title}
+                </h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>

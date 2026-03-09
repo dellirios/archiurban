@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
+import { LogIn, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-architecture.jpg";
 
 const Hero = () => {
@@ -16,20 +16,30 @@ const Hero = () => {
       <div className="absolute inset-0 hero-overlay" />
       
       {/* Conteúdo */}
-      <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-        <h1 className="text-6xl md:text-8xl lg:text-9xl font-light text-white text-architectural mb-8 reveal">
-          ARQUITETURA
+      <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-light text-white text-architectural mb-6 reveal">
+          GESTÃO DE PROJETOS
           <br />
-          MINIMALISTA
+          <span className="text-white/70">PARA ARQUITETOS</span>
         </h1>
-        <p className="text-xl md:text-2xl text-white/80 font-light tracking-wide max-w-2xl mx-auto reveal-delayed">
-          Criando espaços que inspiram através de design consciente e qualidade incomparável
+        <p className="text-lg md:text-xl text-white/80 font-light tracking-wide max-w-2xl mx-auto mb-4 reveal-delayed">
+          A plataforma completa para escritórios de arquitetura gerenciarem projetos, 
+          equipes, clientes e documentos — tudo em um só lugar.
         </p>
-        <div className="mt-10 reveal-delayed">
+        <p className="text-sm md:text-base text-white/60 font-light tracking-wide max-w-xl mx-auto reveal-delayed">
+          CRM integrado · Portfólio público · Chat com clientes · Controle financeiro
+        </p>
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 reveal-delayed">
           <Link to="/login">
             <Button size="lg" className="bg-white text-black hover:bg-white/90 text-base px-8 py-6 rounded-none tracking-widest font-light gap-3">
               <LogIn className="h-5 w-5" />
-              ENTRAR
+              COMEÇAR AGORA
+            </Button>
+          </Link>
+          <Link to="/pricing">
+            <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 text-base px-8 py-6 rounded-none tracking-widest font-light gap-3">
+              VER PLANOS
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

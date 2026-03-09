@@ -3,24 +3,24 @@ import project2 from "@/assets/project-2.jpg";
 import project3 from "@/assets/project-3.jpg";
 
 const Portfolio = () => {
-  const projects = [
+  const screenshots = [
     {
       image: project1,
-      title: "RESIDÊNCIA MINIMALISTA",
-      location: "NOVA YORK, 2024",
-      description: "Uma casa contemporânea focada em luz, espaço e honestidade dos materiais"
+      title: "DASHBOARD COMPLETO",
+      category: "VISÃO GERAL",
+      description: "Acompanhe todos os seus projetos, métricas de desempenho e atividades recentes em um painel centralizado"
     },
     {
       image: project2,
-      title: "SEDE CORPORATIVA",
-      location: "LONDRES, 2023",
-      description: "Espaço de escritório moderno que enfatiza colaboração e elementos naturais"
+      title: "GESTÃO DE PROJETOS",
+      category: "KANBAN & TIMELINE",
+      description: "Organize tarefas em quadros Kanban, defina prazos e acompanhe o progresso de cada etapa da obra"
     },
     {
       image: project3,
-      title: "CENTRO CULTURAL",
-      location: "TÓQUIO, 2023",
-      description: "Arquitetura pública que conecta tradição com design contemporâneo"
+      title: "PORTAL DO CLIENTE",
+      category: "EXPERIÊNCIA DO CLIENTE",
+      description: "Seus clientes acessam fotos, documentos e atualizações do projeto em um portal elegante e profissional"
     }
   ];
 
@@ -28,38 +28,34 @@ const Portfolio = () => {
     <section id="work" className="py-32 bg-muted">
       <div className="container mx-auto px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-20">
-            <h2 className="text-minimal text-muted-foreground mb-4">TRABALHOS SELECIONADOS</h2>
-            <h3 className="text-4xl md:text-6xl font-light text-architectural">
-              Nossos Projetos
+          <div className="mb-20 text-center">
+            <h2 className="text-minimal text-muted-foreground mb-4">PLATAFORMA</h2>
+            <h3 className="text-4xl md:text-6xl font-light text-architectural mb-6">
+              Conheça a Experiência
             </h3>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Interfaces limpas e intuitivas projetadas para que você foque no que importa: 
+              seus projetos de arquitetura.
+            </p>
           </div>
           
-          <div className="space-y-32">
-            {projects.map((project, index) => (
+          <div className="space-y-24">
+            {screenshots.map((item, index) => (
               <div key={index} className="group">
-                <div className="relative overflow-hidden">
+                <div className="relative overflow-hidden rounded-lg shadow-lg">
                   <img 
-                    src={project.image} 
-                    alt={project.title}
-                    className="w-full h-[70vh] object-cover transition-transform duration-700 group-hover:scale-105"
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-[60vh] object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
-                
-                <div className="mt-8 grid md:grid-cols-3 gap-8">
-                  <div>
-                    <h4 className="text-2xl font-light text-architectural mb-2">
-                      {project.title}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-8 left-8 right-8">
+                    <p className="text-minimal text-white/70 mb-2">{item.category}</p>
+                    <h4 className="text-2xl font-light text-white mb-2">
+                      {item.title}
                     </h4>
-                    <p className="text-minimal text-muted-foreground">
-                      {project.location}
-                    </p>
-                  </div>
-                  
-                  <div className="md:col-span-2">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {project.description}
+                    <p className="text-white/80 max-w-lg">
+                      {item.description}
                     </p>
                   </div>
                 </div>
