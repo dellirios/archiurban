@@ -83,8 +83,9 @@ const AppRoutes = () => {
         <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="settings" element={<AppSettings />} />
       </Route>
+      <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin" element={<SuperAdminRoute><SuperAdminLayout /></SuperAdminRoute>}>
-        <Route index element={<AdminDashboard />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="tenants" element={<AdminTenants />} />
         <Route path="tenants/:id" element={<AdminTenantDetail />} />
         <Route path="billing" element={<AdminBilling />} />
