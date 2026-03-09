@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { label: 'Visão Geral', to: '/admin', icon: LayoutDashboard, end: true },
+  { label: 'Visão Geral', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
   { label: 'Escritórios', to: '/admin/tenants', icon: Building2 },
   { label: 'Planos & Faturação', to: '/admin/billing', icon: CreditCard },
   { label: 'Configurações', to: '/admin/settings', icon: Settings },
