@@ -1,3 +1,7 @@
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+
 const Contact = () => {
   return (
     <section id="contact" className="py-32 bg-background">
@@ -5,60 +9,70 @@ const Contact = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-20">
             <div>
-              <h2 className="text-minimal text-muted-foreground mb-4">FALE CONOSCO</h2>
+              <h2 className="text-minimal text-muted-foreground mb-4">COMECE AGORA</h2>
               <h3 className="text-4xl md:text-6xl font-light text-architectural mb-12">
-                Vamos Criar Algo
+                Transforme a Gestão
                 <br />
-                Extraordinário
+                do Seu Escritório
               </h3>
               
-              <div className="space-y-8">
-                <div>
-                  <h4 className="text-minimal text-muted-foreground mb-2">E-MAIL</h4>
-                  <a href="mailto:hello@archstudio.com" className="text-xl hover:text-muted-foreground transition-colors duration-300">
-                    hello@archstudio.com
-                  </a>
-                </div>
-                
-                <div>
-                  <h4 className="text-minimal text-muted-foreground mb-2">TELEFONE</h4>
-                  <a href="tel:+1234567890" className="text-xl hover:text-muted-foreground transition-colors duration-300">
-                    +1 (234) 567-8900
-                  </a>
-                </div>
-                
-                <div>
-                  <h4 className="text-minimal text-muted-foreground mb-2">ESTÚDIO</h4>
-                  <address className="text-xl not-italic">
-                    123 Design Avenue
-                    <br />
-                    Nova York, NY 10001
-                  </address>
-                </div>
+              <div className="space-y-6 mb-10">
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Junte-se a escritórios de arquitetura que já modernizaram sua gestão 
+                  com nossa plataforma. Teste grátis por 14 dias, sem cartão de crédito.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/login">
+                  <Button size="lg" className="rounded-none tracking-widest font-light gap-3 px-8 py-6">
+                    CRIAR CONTA GRÁTIS
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/pricing">
+                  <Button size="lg" variant="outline" className="rounded-none tracking-widest font-light px-8 py-6">
+                    VER PLANOS
+                  </Button>
+                </Link>
               </div>
             </div>
             
             <div className="space-y-8">
               <div>
-                <h4 className="text-minimal text-muted-foreground mb-6">SIGA-NOS</h4>
+                <h4 className="text-minimal text-muted-foreground mb-6">CONTATO</h4>
                 <div className="space-y-4">
-                  <a href="#" className="block text-xl hover:text-muted-foreground transition-colors duration-300">
+                  <div>
+                    <h5 className="text-minimal text-muted-foreground mb-1">E-MAIL</h5>
+                    <a href="mailto:contato@archstudio.com" className="text-lg hover:text-muted-foreground transition-colors duration-300">
+                      contato@archstudio.com
+                    </a>
+                  </div>
+                  <div>
+                    <h5 className="text-minimal text-muted-foreground mb-1">SUPORTE</h5>
+                    <a href="mailto:suporte@archstudio.com" className="text-lg hover:text-muted-foreground transition-colors duration-300">
+                      suporte@archstudio.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-minimal text-muted-foreground mb-6">REDES SOCIAIS</h4>
+                <div className="space-y-3">
+                  <a href="#" className="block text-lg hover:text-muted-foreground transition-colors duration-300">
                     Instagram
                   </a>
-                  <a href="#" className="block text-xl hover:text-muted-foreground transition-colors duration-300">
+                  <a href="#" className="block text-lg hover:text-muted-foreground transition-colors duration-300">
                     LinkedIn
-                  </a>
-                  <a href="#" className="block text-xl hover:text-muted-foreground transition-colors duration-300">
-                    Behance
                   </a>
                 </div>
               </div>
               
-              <div className="pt-12 border-t border-border">
-                <p className="text-muted-foreground">
-                  Abordamos cada projeto com curiosidade, rigor e compromisso com a excelência. 
-                  Nosso processo começa ouvindo, entendendo sua visão e traduzindo-a 
-                  em espaços que superam expectativas.
+              <div className="pt-8 border-t border-border">
+                <p className="text-sm text-muted-foreground">
+                  © 2024 Arch Studio. Plataforma de gestão para escritórios de arquitetura. 
+                  Todos os direitos reservados.
                 </p>
               </div>
             </div>
