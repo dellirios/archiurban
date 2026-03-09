@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Settings, Globe, Shield, Bell, Palette, Database, Save, Loader2,
   Mail, Key, ToggleLeft, CheckCircle2,
@@ -10,8 +10,10 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PlatformSettings {
+  id?: string;
   platformName: string;
   supportEmail: string;
   defaultLanguage: string;
@@ -30,37 +32,96 @@ interface PlatformSettings {
   customCSS: string;
 }
 
+const defaults: PlatformSettings = {
+  platformName: 'ArchiUrban',
+  supportEmail: '',
+  defaultLanguage: 'pt-BR',
+  maintenanceMode: false,
+  allowSignups: true,
+  requireEmailVerification: true,
+  maxTenantsPerPlan: '100',
+  defaultTrialDays: '14',
+  smtpHost: '',
+  smtpPort: '587',
+  notifyNewTenant: true,
+  notifyNewPayment: true,
+  notifyChurn: true,
+  stripeWebhookSecret: '',
+  apiRateLimit: '100',
+  customCSS: '',
+};
+
 const AdminSettings = () => {
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<PlatformSettings>({
-    platformName: 'ArchiUrban',
-    supportEmail: 'suporte@archiurban.com',
-    defaultLanguage: 'pt-BR',
-    maintenanceMode: false,
-    allowSignups: true,
-    requireEmailVerification: true,
-    maxTenantsPerPlan: '100',
-    defaultTrialDays: '14',
-    smtpHost: '',
-    smtpPort: '587',
-    notifyNewTenant: true,
-    notifyNewPayment: true,
-    notifyChurn: true,
-    stripeWebhookSecret: '',
-    apiRateLimit: '100',
-    customCSS: '',
-  });
+  const [loadingData, setLoadingData] = useState(true);
+  const [settings, setSettings] = useState<PlatformSettings>(defaults);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from('platform_settings').select('*').limit(1).single();
+      if (data) {
+        setSettings({
+          id: data.id,
+          platformName: data.platform_name || defaults.platformName,
+          supportEmail: data.support_email || '',
+          defaultLanguage: data.default_language || 'pt-BR',
+          maintenanceMode: data.maintenance_mode ?? false,
+          allowSignups: data.allow_signups ?? true,
+          requireEmailVerification: data.require_email_verification ?? true,
+          maxTenantsPerPlan: String(data.max_tenants_per_plan || 100),
+          defaultTrialDays: String(data.default_trial_days || 14),
+          smtpHost: data.smtp_host || '',
+          smtpPort: data.smtp_port || '587',
+          notifyNewTenant: data.notify_new_tenant ?? true,
+          notifyNewPayment: data.notify_new_payment ?? true,
+          notifyChurn: data.notify_churn ?? true,
+          stripeWebhookSecret: data.stripe_webhook_secret || '',
+          apiRateLimit: String(data.api_rate_limit || 100),
+          customCSS: data.custom_css || '',
+        });
+      }
+      setLoadingData(false);
+    };
+    load();
+  }, []);
 
   const update = (key: keyof PlatformSettings, value: string | boolean) =>
     setSettings(prev => ({ ...prev, [key]: value }));
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate save — in production this would persist to a platform_settings table
-    await new Promise(r => setTimeout(r, 800));
+    const payload = {
+      platform_name: settings.platformName,
+      support_email: settings.supportEmail,
+      default_language: settings.defaultLanguage,
+      maintenance_mode: settings.maintenanceMode,
+      allow_signups: settings.allowSignups,
+      require_email_verification: settings.requireEmailVerification,
+      max_tenants_per_plan: Number(settings.maxTenantsPerPlan) || 100,
+      default_trial_days: Number(settings.defaultTrialDays) || 14,
+      smtp_host: settings.smtpHost,
+      smtp_port: settings.smtpPort,
+      notify_new_tenant: settings.notifyNewTenant,
+      notify_new_payment: settings.notifyNewPayment,
+      notify_churn: settings.notifyChurn,
+      stripe_webhook_secret: settings.stripeWebhookSecret,
+      api_rate_limit: Number(settings.apiRateLimit) || 100,
+      custom_css: settings.customCSS,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = settings.id
+      ? await supabase.from('platform_settings').update(payload as any).eq('id', settings.id)
+      : await supabase.from('platform_settings').insert(payload as any);
+
     setSaving(false);
+    if (error) { toast.error('Erro ao salvar: ' + error.message); return; }
     toast.success('Configurações salvas com sucesso!');
   };
+
+  if (loadingData) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">

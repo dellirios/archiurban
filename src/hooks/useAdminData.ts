@@ -13,6 +13,7 @@ export interface AdminTenantData {
   activeUsers: number;
   projectsCount: number;
   status: 'Ativo' | 'Bloqueado' | 'Trial';
+  dbStatus: string;
   plan: 'Basic' | 'Pro' | 'Premium';
 }
 
@@ -51,8 +52,9 @@ export function useAdminData() {
         accent_color: t.accent_color,
         activeUsers: tenantProfiles.length,
         projectsCount: tenantProjects.length,
-        status: 'Ativo' as const, // default, can be extended with a real status column
-        plan: 'Pro' as const, // default, will come from Stripe later
+        dbStatus: (t as any).status || 'active',
+        status: ((t as any).status === 'blocked' ? 'Bloqueado' : (t as any).status === 'trial' ? 'Trial' : 'Ativo') as 'Ativo' | 'Bloqueado' | 'Trial',
+        plan: 'Pro' as 'Basic' | 'Pro' | 'Premium',
       };
     });
 
