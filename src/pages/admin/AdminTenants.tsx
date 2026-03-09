@@ -94,13 +94,17 @@ const AdminTenants = () => {
 
   const handleBlockToggle = async () => {
     if (!blockTarget) return;
-    // We don't have a status column yet, so we'll use primary_color as a workaround
-    // In a real app you'd add a `status` column. For now we toast the action.
+    setSaving(true);
+    const newStatus = blockAction === 'block' ? 'blocked' : 'active';
+    const { error } = await supabase.from('tenants').update({ status: newStatus } as any).eq('id', blockTarget.id);
+    setSaving(false);
+    if (error) { toast.error('Erro: ' + error.message); setBlockTarget(null); return; }
     toast.success(blockAction === 'block'
       ? `"${blockTarget.name}" foi bloqueado.`
       : `"${blockTarget.name}" foi desbloqueado.`
     );
     setBlockTarget(null);
+    refetch();
   };
 
   const handleDelete = async () => {

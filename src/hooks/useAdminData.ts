@@ -51,8 +51,9 @@ export function useAdminData() {
         accent_color: t.accent_color,
         activeUsers: tenantProfiles.length,
         projectsCount: tenantProjects.length,
-        status: 'Ativo' as const, // default, can be extended with a real status column
-        plan: 'Pro' as const, // default, will come from Stripe later
+        dbStatus: t.status || 'active',
+        status: (t.status === 'blocked' ? 'Bloqueado' : t.status === 'trial' ? 'Trial' : 'Ativo') as const,
+        plan: 'Pro' as const,
       };
     });
 
