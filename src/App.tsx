@@ -38,6 +38,7 @@ import AdminTenants from "./pages/admin/AdminTenants";
 import AdminBilling from "./pages/admin/AdminBilling";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminTenantDetail from "./pages/admin/AdminTenantDetail";
+import AdminTeam from "./pages/admin/AdminTeam";
 
 const queryClient = new QueryClient();
 
