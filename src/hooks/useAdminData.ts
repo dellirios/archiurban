@@ -14,6 +14,7 @@ export interface AdminTenantData {
   projectsCount: number;
   status: 'Ativo' | 'Bloqueado' | 'Trial';
   dbStatus: string;
+  plan: 'Basic' | 'Pro' | 'Premium';
 }
 
 export function useAdminData() {
