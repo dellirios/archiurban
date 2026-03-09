@@ -22,6 +22,16 @@ const navItems = [
 const SuperAdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const initials = user?.email ? user.email.substring(0, 2).toUpperCase() : 'SA';
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Sessão encerrada.');
+    navigate('/admin');
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
