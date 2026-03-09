@@ -96,11 +96,24 @@ const SuperAdminLayout = () => {
         {/* Topbar */}
         <header className="h-14 shrink-0 flex items-center justify-between px-6 border-b border-border bg-card">
           <h2 className="text-sm font-medium text-foreground">Painel Administrativo</h2>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-400">
-              SA
-            </div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                  {initials}
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => navigate('/admin/settings')} className="gap-2 text-xs">
+                <UserCog className="w-3.5 h-3.5" /> Editar Perfil
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="gap-2 text-xs text-destructive focus:text-destructive">
+                <LogOut className="w-3.5 h-3.5" /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
 
         {/* Content */}
