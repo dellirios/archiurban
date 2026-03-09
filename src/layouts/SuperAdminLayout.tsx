@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, CreditCard, Settings, Shield,
-  Menu, X, ChevronLeft, LogOut, UserCog,
+  Menu, X, ChevronLeft, LogOut, UserCog, Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import {
 const navItems = [
   { label: 'Visão Geral', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
   { label: 'Escritórios', to: '/admin/tenants', icon: Building2 },
+  { label: 'Equipe ArchiUrban', to: '/admin/team', icon: Users },
   { label: 'Planos & Faturação', to: '/admin/billing', icon: CreditCard },
   { label: 'Configurações', to: '/admin/settings', icon: Settings },
 ];

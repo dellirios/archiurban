@@ -38,6 +38,7 @@ import AdminTenants from "./pages/admin/AdminTenants";
 import AdminBilling from "./pages/admin/AdminBilling";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminTenantDetail from "./pages/admin/AdminTenantDetail";
+import AdminTeam from "./pages/admin/AdminTeam";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,7 @@ const AppRoutes = () => {
         <Route path="tenants" element={<AdminTenants />} />
         <Route path="tenants/:id" element={<AdminTenantDetail />} />
         <Route path="billing" element={<AdminBilling />} />
+        <Route path="team" element={<AdminTeam />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
