@@ -29,6 +29,8 @@ import ReportsPage from "./pages/ReportsPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import PublicPortfolioPage from "./pages/PublicPortfolioPage";
 import Pricing from "./pages/Pricing";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
@@ -60,6 +62,8 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/p/:slug" element={<PublicPortfolioPage />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:id" element={<BlogPost />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/app" element={
