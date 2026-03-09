@@ -91,19 +91,21 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <AppProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </AppProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="light" storageKey="archiurban-theme">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <AppProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </AppProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
