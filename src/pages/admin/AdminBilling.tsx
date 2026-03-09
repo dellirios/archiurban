@@ -1,48 +1,38 @@
 import { useState, useEffect } from 'react';
 import {
-  CreditCard, Check, Star, Zap, Building2,
-  Receipt, Calendar, Download, Loader2, ExternalLink, Settings,
+  CreditCard, Check, Star, Zap, Building2, Pencil,
+  Receipt, Calendar, Download, Loader2, ExternalLink, Settings, Save,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { stripeTiers, type TierKey } from '@/data/stripeTiers';
 
 interface StripeSub {
-  id: string;
-  tenant: string;
-  plan: string;
-  status: string;
-  startDate: string;
-  nextBilling: string | null;
-  amount: number;
-  currency: string;
+  id: string; tenant: string; plan: string; status: string;
+  startDate: string; nextBilling: string | null; amount: number; currency: string;
 }
-
 interface StripePayment {
-  id: string;
-  tenant: string;
-  date: string;
-  amount: number;
-  currency: string;
-  status: string;
-  method: string;
+  id: string; tenant: string; date: string; amount: number;
+  currency: string; status: string; method: string;
 }
 
-const plans: {
-  name: string;
-  tier: TierKey;
-  price: number;
-  period: string;
-  description: string;
-  features: string[];
-  popular?: boolean;
-  color: string;
-  icon: typeof Building2;
-}[] = [
+interface PlanConfig {
+  name: string; tier: TierKey; price: number; period: string;
+  description: string; features: string[]; popular?: boolean;
+  color: string; icon: typeof Building2;
+}
+
+const defaultPlans: PlanConfig[] = [
   {
     name: 'Basic', tier: 'basic', price: 97, period: '/mês',
     description: 'Para escritórios em fase inicial',
@@ -89,6 +79,11 @@ const AdminBilling = () => {
   const [mrr, setMrr] = useState(0);
   const { subscription, openCustomerPortal } = useAuth();
 
+  // Plan editing
+  const [plans, setPlans] = useState<PlanConfig[]>(defaultPlans);
+  const [editPlan, setEditPlan] = useState<PlanConfig | null>(null);
+  const [editPlanForm, setEditPlanForm] = useState({ name: '', price: '', description: '', features: '' });
+
   useEffect(() => {
     const fetchBilling = async () => {
       setLoadingData(true);
@@ -121,15 +116,41 @@ const AdminBilling = () => {
       if (data?.url) window.open(data.url, '_blank');
     } catch (err: any) {
       toast.error(err.message || 'Erro ao criar sessão de checkout');
-    } finally {
-      setLoadingTier(null);
-    }
+    } finally { setLoadingTier(null); }
   };
 
   const handleManageSubscription = async () => {
     setLoadingPortal(true);
     try { await openCustomerPortal(); } catch { toast.error('Erro ao abrir portal'); }
     finally { setLoadingPortal(false); }
+  };
+
+  const openEditPlan = (plan: PlanConfig) => {
+    setEditPlan(plan);
+    setEditPlanForm({
+      name: plan.name,
+      price: String(plan.price),
+      description: plan.description,
+      features: plan.features.join('\n'),
+    });
+  };
+
+  const handleSavePlan = () => {
+    if (!editPlan) return;
+    const updatedPlans = plans.map(p =>
+      p.tier === editPlan.tier
+        ? {
+            ...p,
+            name: editPlanForm.name,
+            price: Number(editPlanForm.price) || p.price,
+            description: editPlanForm.description,
+            features: editPlanForm.features.split('\n').filter(f => f.trim()),
+          }
+        : p
+    );
+    setPlans(updatedPlans);
+    setEditPlan(null);
+    toast.success(`Plano "${editPlanForm.name}" atualizado! Para alterar preços no Stripe, atualize diretamente no dashboard.`);
   };
 
   return (
@@ -142,11 +163,9 @@ const AdminBilling = () => {
           <p className="text-sm text-muted-foreground">
             MRR atual: <span className="font-semibold text-foreground">{fmt(mrr)}</span>
             {subscription.subscribed && subscription.tier && (
-              <span className="ml-3">
-                · Plano atual: <Badge variant="outline" className="ml-1 text-[11px] bg-primary/10 text-primary border-primary/20">
-                  {subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}
-                </Badge>
-              </span>
+              <span className="ml-3">· Plano atual: <Badge variant="outline" className="ml-1 text-[11px] bg-primary/10 text-primary border-primary/20">
+                {subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}
+              </Badge></span>
             )}
           </p>
           {subscription.subscribed && (
@@ -167,28 +186,48 @@ const AdminBilling = () => {
         <TabsContent value="plans">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {plans.map(plan => (
-              <div key={plan.name} className={`bg-card border-2 ${plan.color} rounded-xl p-6 space-y-5 relative ${plan.popular ? 'ring-1 ring-primary/30' : ''}`}>
+              <div key={plan.tier} className={`bg-card border-2 ${plan.color} rounded-xl p-6 space-y-5 relative ${plan.popular ? 'ring-1 ring-primary/30' : ''}`}>
                 {plan.popular && <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px]">Mais Popular</Badge>}
+                
+                {/* Edit button */}
+                <Button variant="ghost" size="sm" className="absolute top-3 right-3 h-7 w-7 p-0" onClick={() => openEditPlan(plan)}>
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                </Button>
+
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center"><plan.icon className="w-5 h-5 text-primary" /></div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">{plan.name}</h3>
-                  </div>
+                  <h3 className="font-semibold text-foreground">{plan.name}</h3>
                 </div>
-                <div><span className="text-3xl font-bold text-foreground">{fmt(plan.price)}</span><span className="text-sm text-muted-foreground">{plan.period}</span></div>
+                <div>
+                  <span className="text-3xl font-bold text-foreground">{fmt(plan.price)}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                </div>
                 <p className="text-sm text-muted-foreground">{plan.description}</p>
                 <ul className="space-y-2">
                   {plan.features.map(f => <li key={f} className="flex items-center gap-2 text-sm text-foreground"><Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {f}</li>)}
                 </ul>
-                {subscription.tier === plan.tier ? (
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 border-primary text-primary" onClick={handleManageSubscription} disabled={loadingPortal}>
-                    {loadingPortal ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A abrir...</> : <><Settings className="w-3.5 h-3.5" /> Gerir Subscrição</>}
-                  </Button>
-                ) : (
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5" disabled={loadingTier === plan.tier} onClick={() => handleCheckout(plan.tier)}>
-                    {loadingTier === plan.tier ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...</> : <><ExternalLink className="w-3.5 h-3.5" /> Subscrever via Stripe</>}
-                  </Button>
-                )}
+
+                <div className="flex flex-col gap-2">
+                  {subscription.tier === plan.tier ? (
+                    <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 border-primary text-primary" onClick={handleManageSubscription} disabled={loadingPortal}>
+                      {loadingPortal ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A abrir...</> : <><Settings className="w-3.5 h-3.5" /> Gerir Subscrição</>}
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" className="w-full text-xs gap-1.5" disabled={loadingTier === plan.tier} onClick={() => handleCheckout(plan.tier)}>
+                      {loadingTier === plan.tier ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...</> : <><ExternalLink className="w-3.5 h-3.5" /> Subscrever via Stripe</>}
+                    </Button>
+                  )}
+                </div>
+
+                {/* Stripe IDs info */}
+                <div className="pt-2 border-t border-border">
+                  <p className="text-[10px] text-muted-foreground font-mono">
+                    Price: {stripeTiers[plan.tier].price_id.substring(0, 20)}…
+                  </p>
+                  <p className="text-[10px] text-muted-foreground font-mono">
+                    Product: {stripeTiers[plan.tier].product_id.substring(0, 20)}…
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -237,7 +276,7 @@ const AdminBilling = () => {
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <p className="text-sm font-medium text-foreground">Histórico de Pagamentos</p>
-              <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => toast.info('Exportar CSV')}><Download className="w-3.5 h-3.5" /> Exportar</Button>
+              <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => toast.info('Exportar CSV — em breve')}><Download className="w-3.5 h-3.5" /> Exportar</Button>
             </div>
             {loadingData ? (
               <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
@@ -274,6 +313,38 @@ const AdminBilling = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Plan Modal */}
+      <Dialog open={!!editPlan} onOpenChange={() => setEditPlan(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Plano — {editPlan?.name}</DialogTitle>
+            <DialogDescription>Altere os detalhes exibidos na plataforma. Para alterar preços reais, atualize no Stripe Dashboard.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Nome do Plano</Label>
+              <Input value={editPlanForm.name} onChange={e => setEditPlanForm(p => ({ ...p, name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Preço (R$)</Label>
+              <Input type="number" value={editPlanForm.price} onChange={e => setEditPlanForm(p => ({ ...p, price: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Descrição</Label>
+              <Input value={editPlanForm.description} onChange={e => setEditPlanForm(p => ({ ...p, description: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Funcionalidades (uma por linha)</Label>
+              <Textarea rows={5} value={editPlanForm.features} onChange={e => setEditPlanForm(p => ({ ...p, features: e.target.value }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditPlan(null)}>Cancelar</Button>
+            <Button onClick={handleSavePlan} className="gap-1.5"><Save className="w-3.5 h-3.5" /> Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
