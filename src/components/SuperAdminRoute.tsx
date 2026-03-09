@@ -34,7 +34,7 @@ const SuperAdminRoute = ({ children }: Props) => {
     );
   }
 
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/admin" replace />;
 
   if (!isSuperAdmin) {
     return (

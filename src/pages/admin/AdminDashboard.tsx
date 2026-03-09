@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Building2, UserPlus, FolderKanban, ArrowUpRight, Loader2, TrendingUp, Activity,
 } from 'lucide-react';
@@ -6,105 +6,115 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from 'recharts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAdminData } from '@/hooks/useAdminData';
 
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  'hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))', 'hsl(var(--chart-5))',
 ];
 
 const STATUS_LABELS: Record<string, string> = {
-  planning: 'Planejamento',
-  execution: 'Execução',
-  review: 'Revisão',
-  completed: 'Finalizado',
+  planning: 'Planejamento', execution: 'Execução', review: 'Revisão', completed: 'Finalizado',
 };
+
+const PERIOD_OPTIONS = [
+  { value: '30d', label: 'Últimos 30 dias' },
+  { value: '90d', label: 'Últimos 90 dias' },
+  { value: '1y', label: 'Último ano' },
+];
+
+const periodDays: Record<string, number> = { '30d': 30, '90d': 90, '1y': 365 };
 
 const AdminDashboard = () => {
   const { tenants, profiles, projects, kpis, loading } = useAdminData();
+  const [period, setPeriod] = useState('1y');
 
-  // Tenant registration growth by month (last 12 months)
+  const cutoff = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - periodDays[period]);
+    return d;
+  }, [period]);
+
+  // Filter data by period
+  const filteredTenants = useMemo(() => tenants.filter(t => new Date(t.created_at) >= cutoff), [tenants, cutoff]);
+  const filteredProfiles = useMemo(() => profiles.filter(p => new Date(p.created_at) >= cutoff), [profiles, cutoff]);
+  const filteredProjects = useMemo(() => projects.filter(p => new Date(p.created_at) >= cutoff), [projects, cutoff]);
+
+  // KPIs based on period
+  const periodKpis = useMemo(() => ({
+    totalTenants: filteredTenants.length,
+    totalUsers: filteredProfiles.length,
+    totalProjects: filteredProjects.length,
+    newThisMonth: kpis.newThisMonth,
+  }), [filteredTenants, filteredProfiles, filteredProjects, kpis.newThisMonth]);
+
+  // Growth chart data
   const tenantGrowthData = useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const now = new Date();
+    const monthsBack = period === '30d' ? 1 : period === '90d' ? 3 : 12;
     const data: { month: string; tenants: number; users: number }[] = [];
 
-    for (let i = 11; i >= 0; i--) {
+    for (let i = monthsBack - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const label = `${months[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
-      const tenantsCount = tenants.filter(t => {
-        const td = new Date(t.created_at);
-        return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
-      }).length;
-      const usersCount = profiles.filter(p => {
-        const pd = new Date(p.created_at);
-        return pd.getMonth() === d.getMonth() && pd.getFullYear() === d.getFullYear();
-      }).length;
-      data.push({ month: label, tenants: tenantsCount, users: usersCount });
+      const tc = tenants.filter(t => { const td = new Date(t.created_at); return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear(); }).length;
+      const uc = profiles.filter(p => { const pd = new Date(p.created_at); return pd.getMonth() === d.getMonth() && pd.getFullYear() === d.getFullYear(); }).length;
+      data.push({ month: label, tenants: tc, users: uc });
     }
     return data;
-  }, [tenants, profiles]);
+  }, [tenants, profiles, period]);
 
-  // Plan distribution
   const planDistribution = useMemo(() => {
     const counts: Record<string, number> = {};
-    tenants.forEach(t => {
-      const plan = t.plan || 'Basic';
-      counts[plan] = (counts[plan] || 0) + 1;
-    });
+    tenants.forEach(t => { counts[t.plan || 'Basic'] = (counts[t.plan || 'Basic'] || 0) + 1; });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [tenants]);
 
-  // Project status distribution (all tenants)
   const projectStatusData = useMemo(() => {
     const counts: Record<string, number> = {};
-    projects.forEach(p => {
-      counts[p.status] = (counts[p.status] || 0) + 1;
-    });
-    return Object.entries(counts).map(([key, value]) => ({
-      name: STATUS_LABELS[key] || key,
-      value,
-    }));
-  }, [projects]);
+    filteredProjects.forEach(p => { counts[p.status] = (counts[p.status] || 0) + 1; });
+    return Object.entries(counts).map(([key, value]) => ({ name: STATUS_LABELS[key] || key, value }));
+  }, [filteredProjects]);
 
-  // Top tenants by projects
   const topTenants = useMemo(() => {
-    return [...tenants]
-      .sort((a, b) => b.projectsCount - a.projectsCount)
-      .slice(0, 6)
+    return [...tenants].sort((a, b) => b.projectsCount - a.projectsCount).slice(0, 6)
       .map(t => ({ name: t.name.length > 18 ? t.name.slice(0, 18) + '…' : t.name, projetos: t.projectsCount, usuarios: t.activeUsers }));
   }, [tenants]);
 
-  // Recent activity (last 10 profiles created)
   const recentActivity = useMemo(() => {
-    return [...profiles]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 8);
-  }, [profiles]);
+    return [...filteredProfiles].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 8);
+  }, [filteredProfiles]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
   }
 
   const kpiCards = [
-    { label: 'Escritórios', value: kpis.totalTenants, icon: Building2, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-    { label: 'Utilizadores', value: kpis.totalUsers, icon: UserPlus, color: 'text-sky-500', bg: 'bg-sky-500/10' },
-    { label: 'Projetos', value: kpis.totalProjects, icon: FolderKanban, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Novos este mês', value: kpis.newThisMonth, icon: ArrowUpRight, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Escritórios', value: periodKpis.totalTenants, icon: Building2, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+    { label: 'Utilizadores', value: periodKpis.totalUsers, icon: UserPlus, color: 'text-sky-500', bg: 'bg-sky-500/10' },
+    { label: 'Projetos', value: periodKpis.totalProjects, icon: FolderKanban, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Novos este mês', value: periodKpis.newThisMonth, icon: ArrowUpRight, color: 'text-amber-500', bg: 'bg-amber-500/10' },
   ];
 
   return (
     <div className="space-y-6 max-w-7xl">
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">Visão Geral</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Métricas globais da plataforma ArchiUrban</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Visão Geral</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Métricas globais da plataforma ArchiUrban</p>
+        </div>
+        <Select value={period} onValueChange={setPeriod}>
+          <SelectTrigger className="w-[180px] h-9 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PERIOD_OPTIONS.map(o => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* KPI Cards */}
@@ -122,13 +132,13 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Tenant & User Growth Chart */}
+      {/* Growth Chart */}
       <div className="bg-card border border-border rounded-xl p-6">
         <div className="flex items-center gap-2 mb-1">
           <TrendingUp className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-foreground">Crescimento Mensal</h3>
         </div>
-        <p className="text-xs text-muted-foreground mb-5">Registros de escritórios e utilizadores nos últimos 12 meses</p>
+        <p className="text-xs text-muted-foreground mb-5">Registros de escritórios e utilizadores</p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={tenantGrowthData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
@@ -154,9 +164,8 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Middle row: Plan distribution + Project status + Top tenants */}
+      {/* Middle row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Plan Distribution */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-4">Distribuição de Planos</h3>
           {planDistribution.length > 0 ? (
@@ -169,12 +178,9 @@ const AdminDashboard = () => {
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
-          ) : (
-            <p className="text-xs text-muted-foreground text-center py-16">Sem dados</p>
-          )}
+          ) : <p className="text-xs text-muted-foreground text-center py-16">Sem dados</p>}
         </div>
 
-        {/* Project Status */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-4">Status dos Projetos</h3>
           {projectStatusData.length > 0 ? (
@@ -187,12 +193,9 @@ const AdminDashboard = () => {
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
-          ) : (
-            <p className="text-xs text-muted-foreground text-center py-16">Sem projetos</p>
-          )}
+          ) : <p className="text-xs text-muted-foreground text-center py-16">Sem projetos</p>}
         </div>
 
-        {/* Top Tenants */}
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-4">Top Escritórios</h3>
           {topTenants.length > 0 ? (
@@ -205,39 +208,31 @@ const AdminDashboard = () => {
                 <Bar dataKey="projetos" name="Projetos" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} barSize={14} />
               </BarChart>
             </ResponsiveContainer>
-          ) : (
-            <p className="text-xs text-muted-foreground text-center py-16">Sem dados</p>
-          )}
+          ) : <p className="text-xs text-muted-foreground text-center py-16">Sem dados</p>}
         </div>
       </div>
 
-      {/* Bottom row: Recent tenants + Recent activity */}
+      {/* Bottom row */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Recent Tenants */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-border flex items-center gap-2">
             <Building2 className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-semibold text-foreground">Escritórios Recentes</h3>
           </div>
           <div className="divide-y divide-border">
-            {tenants.slice(0, 5).map(t => (
+            {filteredTenants.slice(0, 5).map(t => (
               <div key={t.id} className="px-4 py-3 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-foreground">{t.name}</p>
                   <p className="text-xs text-muted-foreground">{t.activeUsers} utilizadores · {t.projectsCount} projetos</p>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(t.created_at).toLocaleDateString('pt-BR')}
-                </span>
+                <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleDateString('pt-BR')}</span>
               </div>
             ))}
-            {tenants.length === 0 && (
-              <p className="px-4 py-6 text-sm text-muted-foreground text-center">Nenhum escritório registado.</p>
-            )}
+            {filteredTenants.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground text-center">Nenhum escritório no período.</p>}
           </div>
         </div>
 
-        {/* Recent Activity */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-border flex items-center gap-2">
             <Activity className="w-4 h-4 text-primary" />
@@ -253,14 +248,10 @@ const AdminDashboard = () => {
                   <p className="text-sm font-medium text-foreground truncate">{p.full_name || 'Utilizador'}</p>
                   <p className="text-xs text-muted-foreground">{p.role === 'client' ? 'Cliente convidado' : 'Novo registo'}</p>
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0">
-                  {new Date(p.created_at).toLocaleDateString('pt-BR')}
-                </span>
+                <span className="text-xs text-muted-foreground shrink-0">{new Date(p.created_at).toLocaleDateString('pt-BR')}</span>
               </div>
             ))}
-            {recentActivity.length === 0 && (
-              <p className="px-4 py-6 text-sm text-muted-foreground text-center">Nenhuma atividade recente.</p>
-            )}
+            {recentActivity.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground text-center">Nenhuma atividade recente.</p>}
           </div>
         </div>
       </div>

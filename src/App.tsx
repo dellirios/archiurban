@@ -32,6 +32,7 @@ import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminBilling from "./pages/admin/AdminBilling";
@@ -82,8 +83,9 @@ const AppRoutes = () => {
         <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="settings" element={<AppSettings />} />
       </Route>
+      <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin" element={<SuperAdminRoute><SuperAdminLayout /></SuperAdminRoute>}>
-        <Route index element={<AdminDashboard />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="tenants" element={<AdminTenants />} />
         <Route path="tenants/:id" element={<AdminTenantDetail />} />
         <Route path="billing" element={<AdminBilling />} />
