@@ -1,10 +1,16 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, CreditCard, Settings, Shield,
-  Menu, X, ChevronLeft,
+  Menu, X, ChevronLeft, LogOut, UserCog,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const navItems = [
   { label: 'Visão Geral', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
@@ -16,6 +22,16 @@ const navItems = [
 const SuperAdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const initials = user?.email ? user.email.substring(0, 2).toUpperCase() : 'SA';
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Sessão encerrada.');
+    navigate('/admin');
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
@@ -80,11 +96,24 @@ const SuperAdminLayout = () => {
         {/* Topbar */}
         <header className="h-14 shrink-0 flex items-center justify-between px-6 border-b border-border bg-card">
           <h2 className="text-sm font-medium text-foreground">Painel Administrativo</h2>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-400">
-              SA
-            </div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                  {initials}
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => navigate('/admin/settings')} className="gap-2 text-xs">
+                <UserCog className="w-3.5 h-3.5" /> Editar Perfil
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="gap-2 text-xs text-destructive focus:text-destructive">
+                <LogOut className="w-3.5 h-3.5" /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
 
         {/* Content */}
