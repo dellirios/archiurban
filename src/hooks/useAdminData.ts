@@ -52,9 +52,9 @@ export function useAdminData() {
         accent_color: t.accent_color,
         activeUsers: tenantProfiles.length,
         projectsCount: tenantProjects.length,
-        dbStatus: t.status || 'active',
-        status: (t.status === 'blocked' ? 'Bloqueado' : t.status === 'trial' ? 'Trial' : 'Ativo') as const,
-        plan: 'Pro' as const,
+        dbStatus: (t as any).status || 'active',
+        status: ((t as any).status === 'blocked' ? 'Bloqueado' : (t as any).status === 'trial' ? 'Trial' : 'Ativo') as 'Ativo' | 'Bloqueado' | 'Trial',
+        plan: 'Pro' as 'Basic' | 'Pro' | 'Premium',
       };
     });
 
