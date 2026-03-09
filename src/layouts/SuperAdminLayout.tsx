@@ -15,6 +15,7 @@ import {
 const navItems = [
   { label: 'Visão Geral', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
   { label: 'Escritórios', to: '/admin/tenants', icon: Building2 },
+  { label: 'Equipe ArchiUrban', to: '/admin/team', icon: Users },
   { label: 'Planos & Faturação', to: '/admin/billing', icon: CreditCard },
   { label: 'Configurações', to: '/admin/settings', icon: Settings },
 ];
