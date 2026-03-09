@@ -62,6 +62,8 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/p/:slug" element={<PublicPortfolioPage />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:id" element={<BlogPost />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/app" element={
