@@ -32,6 +32,7 @@ import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminBilling from "./pages/admin/AdminBilling";
