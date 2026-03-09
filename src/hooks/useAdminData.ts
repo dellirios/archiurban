@@ -13,7 +13,7 @@ export interface AdminTenantData {
   activeUsers: number;
   projectsCount: number;
   status: 'Ativo' | 'Bloqueado' | 'Trial';
-  plan: 'Basic' | 'Pro' | 'Premium';
+  dbStatus: string;
 }
 
 export function useAdminData() {
