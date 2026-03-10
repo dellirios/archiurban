@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import {
   Mail, Phone, MapPin, Calendar, Flame, Snowflake, Thermometer,
   Send, MessageSquare, PhoneCall, FileText, Clock, Trash2, Loader2,
+  MessageCircle, CalendarPlus, ExternalLink,
 } from 'lucide-react';
 import type { CrmLead } from '@/hooks/useCrmAndFiles';
 
@@ -161,6 +162,45 @@ const LeadDetailModal = ({ lead, open, onOpenChange, onUpdate }: LeadDetailModal
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* WhatsApp & Google Calendar quick actions */}
+          <div className="flex gap-2">
+            {lead.phone && (
+              <a
+                href={`https://wa.me/${lead.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${lead.name}, tudo bem?`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" size="sm" className="w-full gap-2 h-9 text-xs border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]">
+                  <MessageCircle className="w-4 h-4" />
+                  WhatsApp
+                  <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
+                </Button>
+              </a>
+            )}
+            <a
+              href={(() => {
+                const title = encodeURIComponent(`Reunião com ${lead.name}`);
+                const details = encodeURIComponent(`Lead: ${lead.name}\nValor: ${formatCurrency(lead.estimated_value || 0)}\nOrigem: ${lead.origin}\nEmail: ${lead.email || '—'}\nTelefone: ${lead.phone || '—'}`);
+                const now = new Date();
+                const start = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                start.setHours(10, 0, 0, 0);
+                const end = new Date(start.getTime() + 60 * 60 * 1000);
+                const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+                return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${fmt(start)}/${fmt(end)}`;
+              })()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button variant="outline" size="sm" className="w-full gap-2 h-9 text-xs">
+                <CalendarPlus className="w-4 h-4" />
+                Agendar Reunião
+                <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
+              </Button>
+            </a>
           </div>
         </div>
 
