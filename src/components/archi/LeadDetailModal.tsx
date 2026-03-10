@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import {
   Mail, Phone, MapPin, Calendar, Flame, Snowflake, Thermometer,
   Send, MessageSquare, PhoneCall, FileText, Clock, Trash2, Loader2,
+  MessageCircle, CalendarPlus, ExternalLink,
 } from 'lucide-react';
 import type { CrmLead } from '@/hooks/useCrmAndFiles';
 
